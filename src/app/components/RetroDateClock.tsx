@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { useState, useEffect, memo } from "react";
 import { Heart, Cloud, Moon, Sun } from "lucide-react";
+import * as Tooltip from "@radix-ui/react-tooltip";
 import clockFace from "../../assets/clock.svg";
 
 interface TimeSlot {
@@ -285,9 +286,42 @@ const SchedulePieChart = memo(function SchedulePieChart() {
   );
 });
 
+// 툴팁 컴포넌트
+function ClockTooltip({ date, children }: { date: Date; children: React.ReactNode }) {
+  return (
+    <Tooltip.Provider delayDuration={0}>
+      <Tooltip.Root>
+        <Tooltip.Trigger asChild>{children}</Tooltip.Trigger>
+        <Tooltip.Portal>
+          <Tooltip.Content
+            className="bg-gradient-to-br from-[#e91e63] to-[#9c27b0] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,0.5)] px-4 py-2 md:px-6 md:py-3 relative z-50 animate-[tooltipFadeIn_0.2s_ease-out]"
+            side="bottom"
+            sideOffset={8}
+          >
+            <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-[#9c27b0] border-b-4 border-r-4 border-black rotate-45" />
+            <div>
+              <div
+                className="text-white text-center text-xs md:text-sm mb-1"
+                style={{ fontFamily: "'Press Start 2P', monospace" }}
+              >
+                {formatDate(date)}
+              </div>
+              <div
+                className="text-white/90 text-center text-xs md:text-sm"
+                style={{ fontFamily: "'VT323', monospace" }}
+              >
+                {formatTime(date)}
+              </div>
+            </div>
+          </Tooltip.Content>
+        </Tooltip.Portal>
+      </Tooltip.Root>
+    </Tooltip.Provider>
+  );
+}
+
 export function RetroDateClock() {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [showTooltip, setShowTooltip] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -302,60 +336,29 @@ export function RetroDateClock() {
 
   return (
     <div className="flex justify-center mb-10 mt-4 md:mb-12 md:mt-6">
-      <motion.div
-        initial={{ scale: 0, rotate: -180 }}
-        animate={{ scale: 1, rotate: 0 }}
-        transition={{ type: "spring", stiffness: 100, damping: 10 }}
-        className="relative w-full max-w-[20rem] px-4 mx-auto md:max-w-[43rem]"
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
-      >
-        {/* Clock Face */}
-        <div className="relative w-full mx-auto">
-          <motion.img
-            src={clockFace}
-            alt="Clock Face"
-            className="w-full h-auto drop-shadow-[0_20px_40px_rgba(0,0,0,0.6)]"
-            whileHover={{ scale: 1.02 }}
-            transition={{ duration: 0.3 }}
-          />
+      <ClockTooltip date={currentDate}>
+        <motion.div
+          initial={{ scale: 0, rotate: -180 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ type: "spring", stiffness: 100, damping: 10 }}
+          className="relative w-full max-w-[20rem] px-4 mx-auto md:max-w-[43rem]"
+        >
+          {/* Clock Face */}
+          <div className="relative w-full mx-auto">
+            <motion.img
+              src={clockFace}
+              alt="Clock Face"
+              className="w-full h-auto drop-shadow-[0_20px_40px_rgba(0,0,0,0.6)]"
+              whileHover={{ scale: 1.02 }}
+              transition={{ duration: 0.3 }}
+            />
 
-          {/* 24-Hour Schedule Pie Chart Overlay */}
-          <SchedulePieChart />
+            {/* 24-Hour Schedule Pie Chart Overlay */}
+            <SchedulePieChart />
 
-          {/* Clock Hand - rotating based on month */}
-          <ClockHand rotation={rotation} />
-        </div>
-
-        {/* Tooltip */}
-        {showTooltip && (
-          <motion.div
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            className="absolute -top-2 md:-top-3 left-1/2 -translate-x-1/2 z-50 pointer-events-none"
-          >
-            <div className="bg-gradient-to-br from-[#e91e63] to-[#9c27b0] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,0.5)] px-4 py-2 md:px-6 md:py-3 relative">
-              {/* Arrow - pointing down */}
-              <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-[#9c27b0] border-b-4 border-r-4 border-black rotate-45" />
-              
-              <div className="relative">
-                <div
-                  className="text-white text-center text-xs md:text-sm mb-1"
-                  style={{ fontFamily: "'Press Start 2P', monospace" }}
-                >
-                  {formatDate(currentDate)}
-                </div>
-                <div
-                  className="text-white/90 text-center text-xs md:text-sm"
-                  style={{ fontFamily: "'VT323', monospace" }}
-                >
-                  {formatTime(currentDate)}
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
+            {/* Clock Hand - rotating based on month */}
+            <ClockHand rotation={rotation} />
+          </div>
 
         {/* Sparkle Effects */}
         {[...Array(6)].map((_, i) => (
@@ -437,6 +440,7 @@ export function RetroDateClock() {
           </svg>
         </div>
       </motion.div>
+      </ClockTooltip>
     </div>
   );
 }
