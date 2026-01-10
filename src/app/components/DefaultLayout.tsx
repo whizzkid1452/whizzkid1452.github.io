@@ -1,14 +1,25 @@
 import React from "react";
 import { CursorSparkles } from "./CursorSparkles";
 import { Y2KCollageBackground } from "./Y2KCollageBackground";
-import { RetroSidebar } from "./RetroSidebar";
 import { Y2KTextBox } from "./Y2KTextBox";
 import { Y2KSticker } from "./Y2KSticker";
 
 interface DefaultLayoutProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
+/**
+ * DefaultLayout 컴포넌트
+ * 
+ * 모든 페이지에 공통적으로 적용되는 레이아웃 구조:
+ * - 배경 그라데이션 및 스타일
+ * - Y2KCollageBackground: 배경 이미지
+ * - CursorSparkles: 커서 효과
+ * - Footer: 공통 푸터
+ * 
+ * RetroSidebar는 App.tsx에서 직접 관리됩니다.
+ * 이 레이아웃은 순수하게 레이아웃 구조만 담당합니다.
+ */
 export function DefaultLayout({ children }: DefaultLayoutProps) {
   return (
     <div 
@@ -21,15 +32,12 @@ export function DefaultLayout({ children }: DefaultLayoutProps) {
       {/* Cursor Sparkles */}
       <CursorSparkles />
       
-      {/* Sidebar */}
-      <RetroSidebar />
-      
       {/* Main Content - with left margin on desktop for sidebar */}
       <div className="relative z-10 py-4 md:py-8 px-4 lg:ml-64">
         {children}
       </div>
       
-      {/* Footer with Y2K style */}
+      {/* Footer with Y2K style - 모든 페이지에 공통 푸터 */}
       <div className="relative z-10 text-center py-6 md:py-8 mt-6 md:mt-8 lg:ml-64">
         <Y2KTextBox variant="gradient" className="inline-block">
           <p 

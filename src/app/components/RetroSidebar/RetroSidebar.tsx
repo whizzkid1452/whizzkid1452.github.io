@@ -1,10 +1,11 @@
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { useState } from "react";
 import { MobileToggleButton } from "./MobileToggleButton";
 import { SidebarContent } from "./SidebarContent";
 import { MENU_ITEMS } from "./constants";
+import { RetroSidebarProps } from "./types";
 
-export function RetroSidebar() {
+export function RetroSidebar({ currentPage, setCurrentPage }: RetroSidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -20,7 +21,11 @@ export function RetroSidebar() {
         animate={{ x: 0 }}
         className="hidden lg:block fixed left-0 top-0 h-full w-64 bg-[#f8bbd0] border-r-4 border-[#ec407a] shadow-[8px_0px_0px_0px_rgba(0,0,0,0.3)] z-40"
       >
-        <SidebarContent menuItems={MENU_ITEMS} />
+        <SidebarContent 
+          menuItems={MENU_ITEMS} 
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+        />
       </motion.div>
 
       {/* Mobile/Tablet Sidebar - Toggleable */}
@@ -46,6 +51,8 @@ export function RetroSidebar() {
             >
               <SidebarContent 
                 menuItems={MENU_ITEMS} 
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
                 onClose={() => setIsOpen(false)} 
               />
             </motion.div>

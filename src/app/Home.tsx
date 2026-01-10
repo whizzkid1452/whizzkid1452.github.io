@@ -14,11 +14,10 @@ import { RetroMiniGame } from "./components/RetroMiniGame";
 import { PrincessRunnerGame } from "./components/PrincessRunnerGame";
 import { RetroTVGame } from "./components/RetroTVGame";
 import { PixelGrid } from "./components/PixelGrid";
-import { DefaultLayout } from "./components/DefaultLayout";
 
 export function Home() {
   return (
-    <DefaultLayout>
+    <>
       {/* Y2K Hero Section with Stickers */}
       <div className="relative mb-12">
         {/* Floating stickers decoration */}
@@ -120,6 +119,6 @@ export function Home() {
       <RetroMiniGame />
       <PrincessRunnerGame />
       <RetroTVGame />
-    </DefaultLayout>
+    </>
   );
 }

@@ -1,14 +1,14 @@
 import { motion } from "motion/react";
-import { usePage } from "../../App";
-import { MenuItem } from "./types";
+import { MenuItem, Page } from "./types";
 
 interface SidebarMenuProps {
   menuItems: MenuItem[];
+  currentPage: Page;
+  setCurrentPage: (page: Page) => void;
   onItemClick?: () => void;
 }
 
-export function SidebarMenu({ menuItems, onItemClick }: SidebarMenuProps) {
-  const { currentPage, setCurrentPage } = usePage();
+export function SidebarMenu({ menuItems, currentPage, setCurrentPage, onItemClick }: SidebarMenuProps) {
   const activeIndex = menuItems.findIndex(item => item.label === currentPage);
 
   return (
@@ -26,7 +26,7 @@ export function SidebarMenu({ menuItems, onItemClick }: SidebarMenuProps) {
             whileHover={{ x: 8, scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => {
-              setCurrentPage(item.label as any);
+              setCurrentPage(item.label as Page);
               if (onItemClick) onItemClick();
             }}
             className={`w-full p-3 mb-2 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-3 transition-all ${

@@ -3,11 +3,10 @@ import { RetroWindow } from "./components/RetroWindow";
 import { KoreanRetroWindow } from "./components/KoreanRetroWindow";
 import { Y2KSticker } from "./components/Y2KSticker";
 import { Y2KTextBox } from "./components/Y2KTextBox";
-import { DefaultLayout } from "./components/DefaultLayout";
 
 export function About() {
   return (
-    <DefaultLayout>
+    <>
       {/* Y2K Hero Section with Stickers */}
       <div className="relative mb-12">
         {/* Floating stickers decoration */}
@@ -50,6 +49,6 @@ export function About() {
         <RetroWindow />
         <KoreanRetroWindow />
       </div>
-    </DefaultLayout>
+    </>
   );
 }
