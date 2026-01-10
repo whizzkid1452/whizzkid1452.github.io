@@ -31,6 +31,24 @@ export function RetroTVGame() {
     { x: 45, y: 8, size: 20 },
   ]);
 
+  // 컴포넌트 언마운트 시 모든 리소스 정리
+  useEffect(() => {
+    return () => {
+      // 모든 상태 초기화
+      setGameStarted(false);
+      setGameOver(false);
+      setScore(0);
+      setObstacles([]);
+      setFallingObjects([]);
+      setIsJumping(false);
+      setIsDucking(false);
+      setGameSpeed(5);
+      setLives(3);
+      setPlayerX(50);
+      setSelectedGame(null);
+    };
+  }, []);
+
   // Load high score
   useEffect(() => {
     if (selectedGame === "princess") {
@@ -69,7 +87,9 @@ export function RetroTVGame() {
       }]);
     }, 2000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+    };
   }, [gameStarted, gameOver, selectedGame]);
 
   // Princess Runner - Move obstacles
@@ -100,7 +120,9 @@ export function RetroTVGame() {
       });
     }, 50);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+    };
   }, [gameStarted, gameOver, isJumping, isDucking, gameSpeed, selectedGame]);
 
   // Heart Catcher - Spawn falling objects
@@ -120,7 +142,9 @@ export function RetroTVGame() {
       }]);
     }, 1000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+    };
   }, [gameStarted, gameOver, selectedGame]);
 
   // Heart Catcher - Move falling objects
@@ -153,7 +177,9 @@ export function RetroTVGame() {
       });
     }, 50);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+    };
   }, [gameStarted, gameOver, playerX, selectedGame]);
 
   // Increase speed (Princess Runner)
@@ -164,7 +190,9 @@ export function RetroTVGame() {
       setGameSpeed(speed => Math.min(speed + 0.5, 12));
     }, 5000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+    };
   }, [gameStarted, gameOver, selectedGame]);
 
   // Increment score over time (Princess Runner)
@@ -175,12 +203,16 @@ export function RetroTVGame() {
       setScore(s => s + 1);
     }, 100);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+    };
   }, [gameStarted, gameOver, selectedGame]);
 
   // Keyboard controls
   useEffect(() => {
     if (!gameStarted || gameOver) return;
+
+    let jumpTimeoutId: NodeJS.Timeout | null = null;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (selectedGame === "princess") {
@@ -188,7 +220,7 @@ export function RetroTVGame() {
           e.preventDefault();
           if (!isJumping && !isDucking) {
             setIsJumping(true);
-            setTimeout(() => setIsJumping(false), 600);
+            jumpTimeoutId = setTimeout(() => setIsJumping(false), 600);
           }
         } else if (e.key === "ArrowDown") {
           e.preventDefault();
@@ -215,6 +247,9 @@ export function RetroTVGame() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
+      if (jumpTimeoutId) {
+        clearTimeout(jumpTimeoutId);
+      }
     };
   }, [gameStarted, gameOver, isJumping, isDucking, selectedGame]);
 

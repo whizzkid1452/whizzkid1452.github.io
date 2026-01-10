@@ -20,6 +20,20 @@ export function RetroMiniGame() {
   const [gameOver, setGameOver] = useState(false);
   const [highScore, setHighScore] = useState(0);
 
+  // 컴포넌트 언마운트 시 모든 리소스 정리
+  useEffect(() => {
+    return () => {
+      // 모든 상태 초기화
+      setGameStarted(false);
+      setGameOver(false);
+      setScore(0);
+      setLives(3);
+      setPlayerX(50);
+      setFallingObjects([]);
+      setIsOpen(false);
+    };
+  }, []);
+
   // Load high score from localStorage
   useEffect(() => {
     const saved = localStorage.getItem("retro-game-highscore");
@@ -38,7 +52,7 @@ export function RetroMiniGame() {
 
   // Spawn falling objects
   useEffect(() => {
-    if (!gameStarted || gameOver) return;
+    if (!gameStarted || gameOver || !isOpen) return;
 
     const interval = setInterval(() => {
       const types: Array<"heart" | "star" | "bomb"> = ["heart", "heart", "star", "bomb"];
@@ -56,11 +70,11 @@ export function RetroMiniGame() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [gameStarted, gameOver]);
+  }, [gameStarted, gameOver, isOpen]);
 
   // Move falling objects
   useEffect(() => {
-    if (!gameStarted || gameOver) return;
+    if (!gameStarted || gameOver || !isOpen) return;
 
     const interval = setInterval(() => {
       setFallingObjects(prev => {
@@ -95,11 +109,11 @@ export function RetroMiniGame() {
     }, 50);
 
     return () => clearInterval(interval);
-  }, [gameStarted, gameOver, playerX]);
+  }, [gameStarted, gameOver, playerX, isOpen]);
 
   // Handle keyboard controls
   useEffect(() => {
-    if (!gameStarted || gameOver) return;
+    if (!gameStarted || gameOver || !isOpen) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") {
@@ -111,7 +125,7 @@ export function RetroMiniGame() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [gameStarted, gameOver]);
+  }, [gameStarted, gameOver, isOpen]);
 
   const startGame = () => {
     setGameStarted(true);
@@ -155,8 +169,8 @@ export function RetroMiniGame() {
               exit={{ opacity: 0 }}
               className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4"
               onClick={() => {
-                setIsOpen(false);
                 resetGame();
+                setIsOpen(false);
               }}
             >
               {/* Game Window */}
@@ -181,8 +195,8 @@ export function RetroMiniGame() {
                   </div>
                   <button
                     onClick={() => {
-                      setIsOpen(false);
                       resetGame();
+                      setIsOpen(false);
                     }}
                     className="w-8 h-8 bg-red-500 border-2 border-black hover:bg-red-600 flex items-center justify-center"
                   >

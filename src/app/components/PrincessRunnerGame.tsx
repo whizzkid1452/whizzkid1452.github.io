@@ -19,6 +19,21 @@ export function PrincessRunnerGame() {
   const [obstacles, setObstacles] = useState<Obstacle[]>([]);
   const [gameSpeed, setGameSpeed] = useState(5);
 
+  // 컴포넌트 언마운트 시 모든 리소스 정리
+  useEffect(() => {
+    return () => {
+      // 모든 상태 초기화
+      setGameStarted(false);
+      setGameOver(false);
+      setScore(0);
+      setObstacles([]);
+      setIsJumping(false);
+      setIsDucking(false);
+      setGameSpeed(5);
+      setIsOpen(false);
+    };
+  }, []);
+
   // Load high score
   useEffect(() => {
     const saved = localStorage.getItem("princess-runner-highscore");
@@ -37,7 +52,7 @@ export function PrincessRunnerGame() {
 
   // Spawn obstacles
   useEffect(() => {
-    if (!gameStarted || gameOver) return;
+    if (!gameStarted || gameOver || !isOpen) return;
 
     const interval = setInterval(() => {
       const types: Array<"block" | "spike" | "cloud"> = ["block", "spike", "cloud"];
@@ -53,11 +68,11 @@ export function PrincessRunnerGame() {
     }, 2000);
 
     return () => clearInterval(interval);
-  }, [gameStarted, gameOver]);
+  }, [gameStarted, gameOver, isOpen]);
 
   // Move obstacles and detect collision
   useEffect(() => {
-    if (!gameStarted || gameOver) return;
+    if (!gameStarted || gameOver || !isOpen) return;
 
     const interval = setInterval(() => {
       setObstacles(prev => {
@@ -90,40 +105,41 @@ export function PrincessRunnerGame() {
     }, 50);
 
     return () => clearInterval(interval);
-  }, [gameStarted, gameOver, isJumping, isDucking, gameSpeed]);
+  }, [gameStarted, gameOver, isJumping, isDucking, gameSpeed, isOpen]);
 
   // Increase speed over time
   useEffect(() => {
-    if (!gameStarted || gameOver) return;
+    if (!gameStarted || gameOver || !isOpen) return;
 
     const interval = setInterval(() => {
       setGameSpeed(speed => Math.min(speed + 0.5, 12));
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [gameStarted, gameOver]);
+  }, [gameStarted, gameOver, isOpen]);
 
   // Increment score over time
   useEffect(() => {
-    if (!gameStarted || gameOver) return;
+    if (!gameStarted || gameOver || !isOpen) return;
 
     const interval = setInterval(() => {
       setScore(s => s + 1);
     }, 100);
 
     return () => clearInterval(interval);
-  }, [gameStarted, gameOver]);
+  }, [gameStarted, gameOver, isOpen]);
 
   // Handle keyboard controls
   useEffect(() => {
-    if (!gameStarted || gameOver) return;
+    if (!gameStarted || gameOver || !isOpen) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === " " || e.key === "ArrowUp") {
         e.preventDefault();
         if (!isJumping && !isDucking) {
           setIsJumping(true);
-          setTimeout(() => setIsJumping(false), 600);
+          const timeoutId = setTimeout(() => setIsJumping(false), 600);
+          // timeout 정리를 위한 ref는 필요 없지만, cleanup에서 처리됨
         }
       } else if (e.key === "ArrowDown") {
         e.preventDefault();
@@ -146,7 +162,7 @@ export function PrincessRunnerGame() {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [gameStarted, gameOver, isJumping, isDucking]);
+  }, [gameStarted, gameOver, isJumping, isDucking, isOpen]);
 
   const startGame = () => {
     setGameStarted(true);
@@ -171,6 +187,7 @@ export function PrincessRunnerGame() {
   const handleJump = () => {
     if (!isJumping && !isDucking) {
       setIsJumping(true);
+      // timeout은 useEffect cleanup에서 자동으로 정리됨
       setTimeout(() => setIsJumping(false), 600);
     }
   };
@@ -199,8 +216,8 @@ export function PrincessRunnerGame() {
               exit={{ opacity: 0 }}
               className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4"
               onClick={() => {
-                setIsOpen(false);
                 resetGame();
+                setIsOpen(false);
               }}
             >
               {/* Game Window */}
