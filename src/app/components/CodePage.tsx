@@ -1,7 +1,7 @@
 import React from "react";
-import { RetroImage } from "./components/RetroImage";
-import { KoreanPixelGallery } from "./components/KoreanPixelGallery";
-import { PixelGrid } from "./components/PixelGrid";
+import { RetroImage } from "./RetroImage";
+import { KoreanPixelGallery } from "./KoreanPixelGallery";
+import { PixelGrid } from "./PixelGrid";
 
 export function CodePage() {
   return (

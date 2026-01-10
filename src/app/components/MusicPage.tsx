@@ -1,5 +1,5 @@
 import React from "react";
-import { PixelCDPlayer } from "./components/PixelCDPlayer";
+import { PixelCDPlayer } from "./PixelCDPlayer";
 
 export function MusicPage() {
   return (

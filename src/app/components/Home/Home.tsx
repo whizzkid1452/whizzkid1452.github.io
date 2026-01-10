@@ -1,7 +1,7 @@
 import React from "react";
-import { RetroDateClock } from "./components/RetroDateClock";
-import { RetroPlanner } from "./components/RetroPlanner";
-import { HeroSection } from "./components/Home/HeroSection";
+import { RetroDateClock } from "./RetroDateClock";
+import { RetroPlanner } from "../RetroPlanner";
+import { HeroSection } from "./HeroSection";
 
 /**
  * Home 페이지 컴포넌트

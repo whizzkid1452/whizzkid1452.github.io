@@ -1,17 +1,17 @@
 import React, { Suspense, lazy } from "react";
 import { Routes, Route } from "react-router-dom";
-import { Home } from "./Home";
-import { About } from "./About";
+import { Home } from "./components/Home/Home";
+import { About } from "./components/About";
 import { useCustomCursor } from "./hooks/useCustomCursor";
 import { DefaultLayout } from "./components/DefaultLayout";
 import { RetroSidebar } from "./components/RetroSidebar/index";
 
 // 모든 페이지를 lazy loading으로 로드
-const PostPage = lazy(() => import("./PostPage").then(module => ({ default: module.PostPage })));
-const GamePage = lazy(() => import("./GamePage").then(module => ({ default: module.GamePage })));
-const MusicPage = lazy(() => import("./MusicPage").then(module => ({ default: module.MusicPage })));
-const CodePage = lazy(() => import("./CodePage").then(module => ({ default: module.CodePage })));
-const DiaryPage = lazy(() => import("./DiaryPage").then(module => ({ default: module.DiaryPage })));
+const PostPage = lazy(() => import("./components/PostPage").then(module => ({ default: module.PostPage })));
+const GamePage = lazy(() => import("./components/GamePage").then(module => ({ default: module.GamePage })));
+const MusicPage = lazy(() => import("./components/MusicPage").then(module => ({ default: module.MusicPage })));
+const CodePage = lazy(() => import("./components/CodePage").then(module => ({ default: module.CodePage })));
+const DiaryPage = lazy(() => import("./components/DiaryPage").then(module => ({ default: module.DiaryPage })));
 
 /**
  * App 컴포넌트

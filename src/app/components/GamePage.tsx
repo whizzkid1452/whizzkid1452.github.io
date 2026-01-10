@@ -2,9 +2,9 @@ import React, { Suspense, lazy, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 
 // 게임 컴포넌트들을 lazy loading으로 로드
-const RetroMiniGame = lazy(() => import("./components/RetroMiniGame").then(module => ({ default: module.RetroMiniGame })));
-const PrincessRunnerGame = lazy(() => import("./components/PrincessRunnerGame").then(module => ({ default: module.PrincessRunnerGame })));
-const RetroTVGame = lazy(() => import("./components/RetroTVGame").then(module => ({ default: module.RetroTVGame })));
+const RetroMiniGame = lazy(() => import("./RetroMiniGame").then(module => ({ default: module.RetroMiniGame })));
+const PrincessRunnerGame = lazy(() => import("./PrincessRunnerGame").then(module => ({ default: module.PrincessRunnerGame })));
+const RetroTVGame = lazy(() => import("./RetroTVGame").then(module => ({ default: module.RetroTVGame })));
 
 /**
  * GamePage 컴포넌트

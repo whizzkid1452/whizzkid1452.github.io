@@ -2,7 +2,7 @@ import { motion } from "motion/react";
 import { useState, useEffect, memo } from "react";
 import { Heart, Cloud, Moon, Sun } from "lucide-react";
 import * as Tooltip from "@radix-ui/react-tooltip";
-import clockFace from "../../assets/clock.svg";
+import clockFace from "../../../assets/clock.svg";
 
 interface TimeSlot {
   startHour: number;
