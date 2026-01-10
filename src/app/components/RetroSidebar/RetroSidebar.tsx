@@ -3,9 +3,8 @@ import { motion, AnimatePresence } from "motion/react";
 import { MobileToggleButton } from "./MobileToggleButton";
 import { SidebarContent } from "./SidebarContent";
 import { MENU_ITEMS } from "./constants";
-import { RetroSidebarProps } from "./types";
 
-export function RetroSidebar({ currentPage, setCurrentPage }: RetroSidebarProps) {
+export function RetroSidebar() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -23,8 +22,6 @@ export function RetroSidebar({ currentPage, setCurrentPage }: RetroSidebarProps)
       >
         <SidebarContent 
           menuItems={MENU_ITEMS} 
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
         />
       </motion.div>
 
@@ -51,8 +48,6 @@ export function RetroSidebar({ currentPage, setCurrentPage }: RetroSidebarProps)
             >
               <SidebarContent 
                 menuItems={MENU_ITEMS} 
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
                 onClose={() => setIsOpen(false)} 
               />
             </motion.div>
