@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import collageImage from "../../assets/4adadc70cca45e60d0cca0f9b3c66cee813d1f09.png";
+import collageImage from "../../../../assets/4adadc70cca45e60d0cca0f9b3c66cee813d1f09.png";
 
 export function Y2KCollageBackground() {
   // Glitter stars positions
