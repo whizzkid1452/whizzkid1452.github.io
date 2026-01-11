@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "motion/react";
 import { Play } from "lucide-react";
-// @ts-ignore - Vite handles MP3 imports at build time
-import bgmAudio from "../../../assets/[PLAYLIST] It's Britney, bitch  2000s.mp3?url";
 
 export function PixelCDPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -14,15 +12,36 @@ export function PixelCDPlayer() {
   const dragStartVolume = useRef<number>(0.5);
   const hasMoved = useRef<boolean>(false);
 
-  // assets 폴더의 MP3 파일 사용
-  const bgmUrl = bgmAudio;
+  // public 폴더의 MP3 파일 사용
+  // public 폴더의 파일은 base URL을 포함한 경로로 직접 접근
+  const bgmUrl = `${import.meta.env.BASE_URL}music.mp3`;
 
-  // 디버깅: bgmUrl 확인
+  // 디버깅: bgmUrl 및 오디오 상태 확인
   useEffect(() => {
     console.log("BGM URL:", bgmUrl);
     if (audioRef.current) {
       console.log("Audio element:", audioRef.current);
       console.log("Audio src:", audioRef.current.src);
+      console.log("Audio readyState:", audioRef.current.readyState);
+      
+      // 오디오 로드 이벤트 리스너
+      const handleCanPlay = () => {
+        console.log("Audio can play");
+      };
+      
+      const handleError = (e: Event) => {
+        console.error("Audio error event:", e);
+      };
+      
+      audioRef.current.addEventListener('canplay', handleCanPlay);
+      audioRef.current.addEventListener('error', handleError);
+      
+      return () => {
+        if (audioRef.current) {
+          audioRef.current.removeEventListener('canplay', handleCanPlay);
+          audioRef.current.removeEventListener('error', handleError);
+        }
+      };
     }
   }, [bgmUrl]);
 
@@ -41,29 +60,36 @@ export function PixelCDPlayer() {
     }
   }, [volume, isMuted]);
 
-  const togglePlay = async () => {
+  const togglePlay = useCallback(async () => {
     if (audioRef.current) {
       try {
         if (isPlaying) {
           audioRef.current.pause();
           setIsPlaying(false);
         } else {
+          // 오디오가 로드되지 않았으면 로드 시도
+          if (audioRef.current.readyState < 2) {
+            audioRef.current.load();
+          }
           await audioRef.current.play();
           setIsPlaying(true);
         }
       } catch (error) {
         console.error("Audio play error:", error);
+        console.error("Audio element:", audioRef.current);
+        console.error("Audio src:", audioRef.current?.src);
+        console.error("Audio readyState:", audioRef.current?.readyState);
         // 재생 실패 시 상태 업데이트
         setIsPlaying(false);
       }
     }
-  };
+  }, [isPlaying]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     hasMoved.current = false;
     dragStartY.current = e.clientY;
     dragStartVolume.current = volume;
-    e.preventDefault();
+    // preventDefault는 드래그 중에만 호출
   };
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
@@ -75,6 +101,7 @@ export function PixelCDPlayer() {
         if (!prev) return true;
         return prev;
       });
+      e.preventDefault(); // 드래그 중일 때만 preventDefault
       const volumeChange = (dragStartY.current - e.clientY) / 100; // 위로 드래그하면 양수
       let newVolume = dragStartVolume.current + volumeChange;
       
@@ -98,14 +125,11 @@ export function PixelCDPlayer() {
       }
       return prev;
     });
+    // 클릭 처리는 onClick에서만 하므로 여기서는 리셋만
+    setTimeout(() => {
+      hasMoved.current = false;
+    }, 100);
   }, []);
-
-  const handleClick = (e: React.MouseEvent) => {
-    // 드래그가 아닌 경우에만 재생/멈춤 토글
-    if (!hasMoved.current && !isDragging) {
-      togglePlay();
-    }
-  };
 
   useEffect(() => {
     window.addEventListener("mousemove", handleMouseMove);
@@ -144,7 +168,14 @@ export function PixelCDPlayer() {
         <motion.div
           className="relative"
           onMouseDown={handleMouseDown}
-          onClick={handleClick}
+          onClick={(e) => {
+            // 클릭 이벤트도 처리 (드래그가 아닌 경우)
+            if (!hasMoved.current && !isDragging) {
+              e.preventDefault();
+              e.stopPropagation();
+              togglePlay();
+            }
+          }}
           animate={isPlaying ? { rotate: 360 } : {}}
           transition={
             isPlaying
