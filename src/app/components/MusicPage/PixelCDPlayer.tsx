@@ -1,6 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "motion/react";
 import { Play } from "lucide-react";
+// @ts-ignore - Vite handles MP3 imports at build time
+import bgmAudio from "../../../assets/[PLAYLIST] It's Britney, bitch  2000s.mp3?url";
 
 export function PixelCDPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -10,14 +12,19 @@ export function PixelCDPlayer() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const dragStartY = useRef<number>(0);
   const dragStartVolume = useRef<number>(0.5);
+  const hasMoved = useRef<boolean>(false);
 
-  // BGM URL - 원하는 음원: https://www.youtube.com/watch?v=rg8yV2sqaPs
-  // YouTube 링크는 직접 사용할 수 없으므로, 아래 방법 중 하나를 선택하세요:
-  // 1. YouTube에서 음원을 다운로드하여 /public 폴더에 저장 후 "/bgm.mp3" 형식으로 사용
-  // 2. 음원을 클라우드에 업로드하고 직접 링크 사용 (Dropbox, Google Drive 등)
-  // 3. 무료 음원 호스팅 서비스 사용
-  // 현재는 placeholder 음원을 사용합니다
-  const bgmUrl = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
+  // assets 폴더의 MP3 파일 사용
+  const bgmUrl = bgmAudio;
+
+  // 디버깅: bgmUrl 확인
+  useEffect(() => {
+    console.log("BGM URL:", bgmUrl);
+    if (audioRef.current) {
+      console.log("Audio element:", audioRef.current);
+      console.log("Audio src:", audioRef.current.src);
+    }
+  }, [bgmUrl]);
 
   useEffect(() => {
     const savedVolume = localStorage.getItem("bgm-volume");
@@ -34,28 +41,41 @@ export function PixelCDPlayer() {
     }
   }, [volume, isMuted]);
 
-  const togglePlay = () => {
+  const togglePlay = async () => {
     if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
+      try {
+        if (isPlaying) {
+          audioRef.current.pause();
+          setIsPlaying(false);
+        } else {
+          await audioRef.current.play();
+          setIsPlaying(true);
+        }
+      } catch (error) {
+        console.error("Audio play error:", error);
+        // 재생 실패 시 상태 업데이트
+        setIsPlaying(false);
       }
-      setIsPlaying(!isPlaying);
     }
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
+    hasMoved.current = false;
     dragStartY.current = e.clientY;
     dragStartVolume.current = volume;
     e.preventDefault();
   };
 
-  const handleMouseMove = (e: MouseEvent) => {
-    if (isDragging) {
-      const deltaY = dragStartY.current - e.clientY; // 위로 드래그하면 양수
-      const volumeChange = deltaY / 100; // 100px 드래그 = 볼륨 1.0 변화
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    const deltaY = Math.abs(dragStartY.current - e.clientY);
+    if (deltaY > 5) {
+      // 5px 이상 움직였으면 드래그로 간주
+      hasMoved.current = true;
+      setIsDragging((prev) => {
+        if (!prev) return true;
+        return prev;
+      });
+      const volumeChange = (dragStartY.current - e.clientY) / 100; // 위로 드래그하면 양수
       let newVolume = dragStartVolume.current + volumeChange;
       
       // 0과 1 사이로 제한
@@ -68,32 +88,34 @@ export function PixelCDPlayer() {
         setIsMuted(false);
       }
     }
-  };
+  }, []);
 
-  const handleMouseUp = () => {
-    if (isDragging) {
-      setIsDragging(false);
-    }
-  };
+  const handleMouseUp = useCallback(() => {
+    setIsDragging((prev) => {
+      if (prev) {
+        hasMoved.current = false;
+        return false;
+      }
+      return prev;
+    });
+  }, []);
 
   const handleClick = (e: React.MouseEvent) => {
     // 드래그가 아닌 경우에만 재생/멈춤 토글
-    if (!isDragging) {
+    if (!hasMoved.current && !isDragging) {
       togglePlay();
     }
   };
 
   useEffect(() => {
-    if (isDragging) {
-      window.addEventListener("mousemove", handleMouseMove);
-      window.addEventListener("mouseup", handleMouseUp);
-      
-      return () => {
-        window.removeEventListener("mousemove", handleMouseMove);
-        window.removeEventListener("mouseup", handleMouseUp);
-      };
-    }
-  }, [isDragging]);
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [handleMouseMove, handleMouseUp]);
 
   if (!bgmUrl) {
     return null;
@@ -101,7 +123,18 @@ export function PixelCDPlayer() {
 
   return (
     <>
-      <audio ref={audioRef} src={bgmUrl} loop />
+      <audio 
+        ref={audioRef} 
+        src={bgmUrl} 
+        loop
+        onError={(e) => {
+          console.error("Audio load error:", e);
+          console.error("Audio src:", bgmUrl);
+        }}
+        onLoadedData={() => {
+          console.log("Audio loaded successfully");
+        }}
+      />
       
       <div 
         className="fixed top-6 right-6 z-50 select-none"
