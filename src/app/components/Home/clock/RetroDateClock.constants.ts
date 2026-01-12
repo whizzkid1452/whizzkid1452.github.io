@@ -1,19 +1,17 @@
-export interface TimeSlot {
-  startHour: number;
-  endHour: number;
+export interface MonthSlot {
+  startMonth: number; // 1-12
+  endMonth: number; // 1-12 (exclusive, so 12 means up to but not including 12)
   title: string;
   color: string;
 }
 
-export const SCHEDULE: TimeSlot[] = [
-  // 12시 방향 (0-6시): react + JS+코테
-  { startHour: 0, endHour: 3, title: "react", color: "#F3E5F580" },
-  { startHour: 3, endHour: 6, title: "JS+코테", color: "#E3F2FD80" },
-  // 3시 방향 (6-12시): VOIX Studio & 프로젝트 + JS+코테
-  { startHour: 6, endHour: 9, title: "VOIX Studio & 프로젝트", color: "#E8F5E980" },
-  { startHour: 9, endHour: 12, title: "JS+코테", color: "#E3F2FD80" },
-  // 6시 방향 (12-18시): fundamentals 적용.
-  { startHour: 12, endHour: 18, title: "fundamentals 적용.", color: "#FFF9E380" },
-  // 9시 방향 (18-24시): 포폴로비!
-  { startHour: 18, endHour: 24, title: "포폴로비!", color: "#FFE5EC80" },
+export const SCHEDULE: MonthSlot[] = [
+  // 12-2월: React 끝내기
+  { startMonth: 12, endMonth: 3, title: "React 끝내기", color: "#F3E5F580" },
+  // 3-5월: JS Deep Dive, 코테
+  { startMonth: 3, endMonth: 6, title: "JS Deep Dive\n코테", color: "#E3F2FD80" },
+  // 6-8월: 포폴, 면접 준비
+  { startMonth: 6, endMonth: 9, title: "포폴\n면접 준비", color: "#FFE5EC80" },
+  // 9-11월: (전체 기간에 걸쳐서 하는 일은 중앙에 표시)
+  { startMonth: 9, endMonth: 12, title: "", color: "#E8F5E980" },
 ];

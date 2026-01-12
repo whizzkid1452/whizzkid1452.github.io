@@ -91,3 +91,19 @@ export function getPieChartTextStyle(fontSize: string) {
     fontSize,
   };
 }
+
+export function getCenterTextStyle(fontSize: string) {
+  return {
+    fontFamily: "'DungGeunMo', monospace",
+    fontSize,
+    fill: "#FFFFFF",
+    fontWeight: "bold",
+    stroke: "#FF1493",
+    strokeWidth: "0.3",
+    paintOrder: "stroke fill",
+  };
+}
+
+export const centerTextStyles = {
+  container: "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10",
+} as const;

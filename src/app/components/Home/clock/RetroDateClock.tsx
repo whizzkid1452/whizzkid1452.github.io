@@ -6,6 +6,7 @@ import clockFace from "../../../../assets/clock.svg";
 import { ClockHand } from "./RetroDateClock.ClockHand";
 import { SchedulePieChart } from "./RetroDateClock.SchedulePieChart";
 import { ClockTooltip } from "./RetroDateClock.Tooltip";
+import { CenterText } from "./RetroDateClock.CenterText";
 import { calculateMonthRotation } from "./RetroDateClock.utils";
 import { mainContainerStyles, decorativeStyles, getSparklePosition } from "./RetroDateClock.styles";
 
@@ -47,6 +48,9 @@ export function RetroDateClock() {
 
             {/* Clock Hand - rotating based on month */}
             <ClockHand rotation={rotation} date={currentDate} />
+
+            {/* Center Text - on top of clock hand */}
+            <CenterText />
           </div>
         </ClockTooltip>
 
