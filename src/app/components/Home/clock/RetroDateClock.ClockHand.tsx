@@ -1,5 +1,4 @@
 import { useState, useEffect, memo } from "react";
-import { ClockTooltip } from "./RetroDateClock.Tooltip";
 import {
   clockHandStyles,
   heartIconStyles,
@@ -42,17 +41,16 @@ export const ClockHand = memo(function ClockHand({ rotation, date }: ClockHandPr
     >
       <div className={clockHandStyles.handContainer}>
         <div className="relative flex flex-col items-center">
-          {/* Pixel Heart at top with tooltip */}
-          <ClockTooltip date={date}>
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              className={heartIconStyles.container}
-              style={{
-                animation: "heartPulse 1.5s ease-in-out infinite",
-              }}
-            >
+          {/* Pixel Heart at top */}
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            className={heartIconStyles.container}
+            style={{
+              animation: "heartPulse 1.5s ease-in-out infinite",
+            }}
+          >
               <defs>
                 <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stopColor="#FF69B4" />
@@ -106,7 +104,6 @@ export const ClockHand = memo(function ClockHand({ rotation, date }: ClockHandPr
 
               <rect x="12" y="21" width="3" height="3" fill="#9c27b0" />
             </svg>
-          </ClockTooltip>
 
           {/* Pixel stick body */}
           <div className="flex flex-col gap-0 drop-shadow-[1px_1px_2px_rgba(0,0,0,0.3)]">

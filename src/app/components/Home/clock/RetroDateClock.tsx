@@ -1,9 +1,11 @@
+import React from "react";
 import { motion } from "motion/react";
 import { useState, useEffect } from "react";
 import { Heart, Cloud, Moon, Sun } from "lucide-react";
 import clockFace from "../../../../assets/clock.svg";
 import { ClockHand } from "./RetroDateClock.ClockHand";
 import { SchedulePieChart } from "./RetroDateClock.SchedulePieChart";
+import { ClockTooltip } from "./RetroDateClock.Tooltip";
 import { calculateMonthRotation } from "./RetroDateClock.utils";
 import { mainContainerStyles, decorativeStyles, getSparklePosition } from "./RetroDateClock.styles";
 
@@ -30,21 +32,23 @@ export function RetroDateClock() {
         className={mainContainerStyles.container}
       >
         {/* Clock Face */}
-        <div className={mainContainerStyles.clockFace}>
-          <motion.img
-            src={clockFace}
-            alt="Clock Face"
-            className={mainContainerStyles.clockImage}
-            whileHover={{ scale: 1.02 }}
-            transition={{ duration: 0.3 }}
-          />
+        <ClockTooltip date={currentDate}>
+          <div className={mainContainerStyles.clockFace}>
+            <motion.img
+              src={clockFace}
+              alt="Clock Face"
+              className={mainContainerStyles.clockImage}
+              whileHover={{ scale: 1.02 }}
+              transition={{ duration: 0.3 }}
+            />
 
-          {/* 24-Hour Schedule Pie Chart Overlay */}
-          <SchedulePieChart />
+            {/* 24-Hour Schedule Pie Chart Overlay */}
+            <SchedulePieChart />
 
-          {/* Clock Hand - rotating based on month */}
-          <ClockHand rotation={rotation} date={currentDate} />
-        </div>
+            {/* Clock Hand - rotating based on month */}
+            <ClockHand rotation={rotation} date={currentDate} />
+          </div>
+        </ClockTooltip>
 
         {/* Sparkle Effects */}
         {[...Array(6)].map((_, i) => (
