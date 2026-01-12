@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { X, Save, MessageSquare, User } from "lucide-react";
 import { useState } from "react";
+import { createPortal } from "react-dom";
 
 interface GuestBookEntry {
   name: string;
@@ -36,7 +37,7 @@ export function RetroGuestBookEditor({ onClose, onSave }: GuestBookEditorProps) 
     }
   };
 
-  return (
+  const modalContent = (
     <>
       {/* Overlay */}
       <motion.div
@@ -44,7 +45,7 @@ export function RetroGuestBookEditor({ onClose, onSave }: GuestBookEditorProps) 
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+        className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4"
       />
 
       {/* Editor Window */}
@@ -53,7 +54,7 @@ export function RetroGuestBookEditor({ onClose, onSave }: GuestBookEditorProps) 
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.8, opacity: 0, y: 50 }}
         transition={{ type: "spring", stiffness: 200 }}
-        className="fixed inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-3xl z-50 bg-white border-4 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col max-h-[90vh]"
+        className="fixed inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-3xl z-[9999] bg-white border-4 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col max-h-[90vh]"
       >
         {/* Title Bar */}
         <div className="bg-gradient-to-r from-[#e91e63] via-[#f06292] to-[#e91e63] p-3 md:p-4 border-b-4 border-black flex items-center justify-between">
@@ -174,4 +175,9 @@ export function RetroGuestBookEditor({ onClose, onSave }: GuestBookEditorProps) 
       </motion.div>
     </>
   );
+
+  // Portal을 사용하여 body에 직접 렌더링
+  return typeof window !== "undefined" 
+    ? createPortal(modalContent, document.body)
+    : null;
 }
