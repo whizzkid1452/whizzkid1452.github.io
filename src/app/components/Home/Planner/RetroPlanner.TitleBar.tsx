@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { Image as ImageIcon, X, Minimize2, Maximize2 } from "lucide-react";
-import { containerStyles, buttonStyles, textStyles, getWindowBorderStyle, getFontStyle } from "./Planner/RetroPlanner.styles";
+import { containerStyles, buttonStyles, textStyles, getWindowBorderStyle, getFontStyle } from "./RetroPlanner.styles";
 
 interface RetroPlannerTitleBarProps {
   isMinimized: boolean;

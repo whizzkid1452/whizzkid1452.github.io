@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 import { Heart } from "lucide-react";
-import { containerStyles, buttonStyles, getWindowBorderStyle } from "./Planner/RetroPlanner.styles";
-import { tools } from "./Planner/RetroPlanner.constants";
+import { containerStyles, buttonStyles, getWindowBorderStyle } from "./RetroPlanner.styles";
+import { tools } from "./RetroPlanner.constants";
 
 interface RetroPlannerToolboxProps {
   onAddTask: () => void;

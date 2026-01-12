@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { RetroPlannerEditor } from "./RetroPlannerEditor";
 import type { Task } from "./RetroPlanner.types";
-import { tasksPerPage } from "./Planner/RetroPlanner.constants";
+import { tasksPerPage } from "./RetroPlanner.constants";
 import {
   formatDate,
   formatDisplayDate,
@@ -16,21 +16,21 @@ import {
   getCanvasGradient,
   getPixelGridPattern,
   decorationStyles,
-} from "./Planner/RetroPlanner.styles";
-import { RetroPlannerFloatingDecorations } from "./Planner/RetroPlanner.FloatingDecorations";
-import { RetroPlannerTitleBar } from "./Planner/RetroPlanner.TitleBar";
-import { RetroPlannerMenuBar } from "./Planner/RetroPlanner.MenuBar";
-import { RetroPlannerToolbox } from "./Planner/RetroPlanner.Toolbox";
-import { RetroPlannerCanvasDecorations } from "./Planner/RetroPlanner.CanvasDecorations";
-import { RetroPlannerDateNavigator } from "./Planner/RetroPlanner.DateNavigator";
+} from "./RetroPlanner.styles";
+import { RetroPlannerFloatingDecorations } from "./RetroPlanner.FloatingDecorations";
+import { RetroPlannerTitleBar } from "./RetroPlanner.TitleBar";
+import { RetroPlannerMenuBar } from "./RetroPlanner.MenuBar";
+import { RetroPlannerToolbox } from "./RetroPlanner.Toolbox";
+import { RetroPlannerCanvasDecorations } from "./RetroPlanner.CanvasDecorations";
+import { RetroPlannerDateNavigator } from "./RetroPlanner.DateNavigator";
 import { RetroPlannerWeekView } from "./RetroPlanner.WeekView";
-import { RetroPlannerMonthView } from "./Planner/RetroPlanner.MonthView";
-import { RetroPlannerStats } from "./Planner/RetroPlanner.Stats";
-import { RetroPlannerTaskList } from "./Planner/RetroPlanner.TaskList";
-import { RetroPlannerPagination } from "./Planner/RetroPlanner.Pagination";
-import { RetroPlannerProgressBar } from "./Planner/RetroPlanner.ProgressBar";
-import { RetroPlannerColorPalette } from "./Planner/RetroPlanner.ColorPalette";
-import { RetroPlannerStatusBar } from "./Planner/RetroPlanner.StatusBar";
+import { RetroPlannerMonthView } from "./RetroPlanner.MonthView";
+import { RetroPlannerStats } from "./RetroPlanner.Stats";
+import { RetroPlannerTaskList } from "./RetroPlanner.TaskList";
+import { RetroPlannerPagination } from "./RetroPlanner.Pagination";
+import { RetroPlannerProgressBar } from "./RetroPlanner.ProgressBar";
+import { RetroPlannerColorPalette } from "./RetroPlanner.ColorPalette";
+import { RetroPlannerStatusBar } from "./RetroPlanner.StatusBar";
 
 export function RetroPlanner() {
   const [showEditor, setShowEditor] = useState(false);
@@ -132,7 +132,6 @@ export function RetroPlanner() {
     }
   };
 
-  // Reset to first page when date changes
   const handleDateChange = (date: Date) => {
     setSelectedDate(date);
     setCurrentPage(1);
@@ -231,7 +230,6 @@ export function RetroPlanner() {
                             hoveredDate={hoveredDate}
                             onDateChange={handleDateChange}
                             onHoverDate={setHoveredDate}
-                            onShowTaskDetail={() => {}}
                           />
                         )}
 

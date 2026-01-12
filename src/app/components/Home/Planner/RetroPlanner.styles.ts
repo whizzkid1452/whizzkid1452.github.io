@@ -1,4 +1,3 @@
-// 스타일 관련 상수 및 유틸리티
 import type { WeekDate, MonthDate } from "./RetroPlanner.types";
 
 export const containerStyles = {
@@ -39,12 +38,6 @@ export const textStyles = {
 } as const;
 
 export const borderStyles = {
-  windowBorder: {
-    borderTopColor: "#ffffff",
-    borderLeftColor: "#ffffff",
-    borderRightColor: "#808080",
-    borderBottomColor: "#808080",
-  },
   windowBorderStyle: {
     borderTopColor: "#ffffff",
     borderLeftColor: "#ffffff",
@@ -73,7 +66,6 @@ export const calendarStyles = {
   monthView: "mb-4",
   monthHeader: "grid grid-cols-7 gap-1 mb-1",
   monthGrid: "grid grid-cols-7 gap-1",
-  weekDay: "p-1 text-center text-[10px] bg-[#FFB6C1] border-2 border-[#FF1493]",
   monthDay: "w-full aspect-square p-1 border-2 transition-colors relative",
 } as const;
 
@@ -90,7 +82,6 @@ export const tooltipStyles = {
   tooltipContent: "space-y-2 max-h-48 overflow-y-auto",
 } as const;
 
-// 인라인 스타일 생성 함수들
 export function getWindowBorderStyle() {
   return {
     borderTopColor: "#ffffff",

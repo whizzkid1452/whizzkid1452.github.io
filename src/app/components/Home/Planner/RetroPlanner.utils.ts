@@ -1,5 +1,5 @@
-import { Task, WeekDate, MonthDate, DisplayDate, MonthDisplay } from "./Planner/RetroPlanner.types";
-import { weekdays, weekdaysEn, monthNames, monthNamesEn } from "./Planner/RetroPlanner.constants";
+import { Task, WeekDate, MonthDate, DisplayDate, MonthDisplay } from "./RetroPlanner.types";
+import { weekdays, weekdaysEn, monthNames, monthNamesEn } from "./RetroPlanner.constants";
 
 export function formatDate(date: Date): string {
   const year = date.getFullYear();
@@ -40,7 +40,6 @@ export function getWeekDates(selectedDate: Date, tasks: Task[], selectedDateStr:
       isToday: dateStr === formatDate(new Date()),
       isSelected: dateStr === selectedDateStr,
       taskCount: dayTasks.length,
-      completedCount: dayTasks.filter((t) => t.completed).length,
     });
   }
   return week;
@@ -56,7 +55,6 @@ export function getMonthDates(selectedDate: Date, tasks: Task[], selectedDateStr
 
   const dates: MonthDate[] = [];
   
-  // Previous month's trailing days
   const prevMonthLastDay = new Date(year, month, 0).getDate();
   for (let i = startDay - 1; i >= 0; i--) {
     const date = new Date(year, month - 1, prevMonthLastDay - i);
@@ -68,7 +66,6 @@ export function getMonthDates(selectedDate: Date, tasks: Task[], selectedDateStr
       isToday: formatDate(date) === formatDate(new Date()),
       isSelected: formatDate(date) === selectedDateStr,
       taskCount: 0,
-      completedCount: 0,
     });
   }
 
@@ -85,11 +82,9 @@ export function getMonthDates(selectedDate: Date, tasks: Task[], selectedDateStr
       isToday: dateStr === formatDate(new Date()),
       isSelected: dateStr === selectedDateStr,
       taskCount: dayTasks.length,
-      completedCount: dayTasks.filter((t) => t.completed).length,
     });
   }
 
-  // Next month's leading days
   const remainingDays = 42 - dates.length;
   for (let day = 1; day <= remainingDays; day++) {
     const date = new Date(year, month + 1, day);
@@ -101,7 +96,6 @@ export function getMonthDates(selectedDate: Date, tasks: Task[], selectedDateStr
       isToday: formatDate(date) === formatDate(new Date()),
       isSelected: formatDate(date) === selectedDateStr,
       taskCount: 0,
-      completedCount: 0,
     });
   }
 

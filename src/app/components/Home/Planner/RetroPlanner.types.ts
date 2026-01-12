@@ -15,7 +15,6 @@ export interface WeekDate {
   isToday: boolean;
   isSelected: boolean;
   taskCount: number;
-  completedCount: number;
 }
 
 export interface MonthDate {
@@ -26,7 +25,6 @@ export interface MonthDate {
   isToday: boolean;
   isSelected: boolean;
   taskCount: number;
-  completedCount: number;
 }
 
 export interface DisplayDate {

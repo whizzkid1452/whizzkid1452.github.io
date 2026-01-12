@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
-import { calendarStyles, buttonStyles, textStyles, getWeekDayStyle, getFontStyle } from "./Planner/RetroPlanner.styles";
-import type { WeekDate } from "./Planner/RetroPlanner.types";
+import { calendarStyles, textStyles, getWeekDayStyle, getFontStyle } from "./RetroPlanner.styles";
+import type { WeekDate } from "./RetroPlanner.types";
 
 interface RetroPlannerWeekViewProps {
   weekDates: WeekDate[];

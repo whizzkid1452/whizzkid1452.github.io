@@ -4,7 +4,6 @@ import {
 } from "lucide-react";
 import { Tool } from "./RetroPlanner.types";
 
-// Pink palette colors
 export const paletteColors = [
   "#FF1493", "#FF69B4", "#FFB6C1", "#FFC0CB", "#FFE4E1", 
   "#FADADD", "#F8BBD0", "#F48FB1", "#F06292", "#EC407A",
@@ -14,7 +13,6 @@ export const paletteColors = [
   "#EE82EE", "#DA70D6", "#DDA0DD", "#EE82EE", "#FF00FF",
 ] as const;
 
-// Tool icons
 export const tools: Tool[] = [
   { icon: Pencil, label: "Pencil", color: "#FF69B4" },
   { icon: Brush, label: "Brush", color: "#FF1493" },

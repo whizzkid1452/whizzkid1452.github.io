@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 import { Star } from "lucide-react";
 import { RetroPlannerTask } from "./RetroPlannerTask";
-import { taskStyles, textStyles, getFontStyle } from "./Planner/RetroPlanner.styles";
+import { taskStyles, textStyles, getFontStyle } from "./RetroPlanner.styles";
 import type { Task } from "./RetroPlanner.types";
 
 interface RetroPlannerTaskListProps {

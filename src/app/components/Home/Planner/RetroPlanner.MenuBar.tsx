@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { containerStyles, buttonStyles, getFontStyle } from "./RetroPlanner.styles";
-import { menuItems } from "./Planner/RetroPlanner.constants";
+import { menuItems } from "./RetroPlanner.constants";
 
 export function RetroPlannerMenuBar() {
   return (

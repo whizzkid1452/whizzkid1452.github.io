@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "motion/react";
 import { CheckCircle2 } from "lucide-react";
 import { calendarStyles, tooltipStyles, getMonthDayStyle, getTaskPriorityStyle, getFontStyle } from "./RetroPlanner.styles";
-import { weekdays } from "./Planner/RetroPlanner.constants";
+import { weekdays } from "./RetroPlanner.constants";
 import type { MonthDate, Task } from "./RetroPlanner.types";
 
 interface RetroPlannerMonthViewProps {
@@ -10,7 +10,6 @@ interface RetroPlannerMonthViewProps {
   hoveredDate: string | null;
   onDateChange: (date: Date) => void;
   onHoverDate: (dateStr: string | null) => void;
-  onShowTaskDetail: () => void;
 }
 
 export function RetroPlannerMonthView({
@@ -19,7 +18,6 @@ export function RetroPlannerMonthView({
   hoveredDate,
   onDateChange,
   onHoverDate,
-  onShowTaskDetail,
 }: RetroPlannerMonthViewProps) {
   return (
     <div className={calendarStyles.monthView}>
@@ -47,9 +45,6 @@ export function RetroPlannerMonthView({
                 onClick={() => {
                   if (day.isCurrentMonth) {
                     onDateChange(day.date);
-                    if (dayTasks.length > 0) {
-                      onShowTaskDetail();
-                    }
                   }
                 }}
                 onMouseEnter={() => day.isCurrentMonth && onHoverDate(day.dateStr)}
@@ -75,8 +70,6 @@ export function RetroPlannerMonthView({
                   >
                     {day.day}
                   </div>
-                  
-                  {/* Show mini task list */}
                   {day.isCurrentMonth && dayTasks.length > 0 && (
                     <div className="w-full space-y-0.5 mt-1">
                       {dayTasks.slice(0, 2).map((task) => (
@@ -104,7 +97,6 @@ export function RetroPlannerMonthView({
                 </div>
               </motion.button>
 
-              {/* Hover Tooltip */}
               <AnimatePresence>
                 {hoveredDate === day.dateStr && dayTasks.length > 0 && (
                   <motion.div
