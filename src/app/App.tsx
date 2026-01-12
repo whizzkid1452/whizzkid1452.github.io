@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { Home } from "./components/Home/Home";
 import { About } from "./components/AboutPage/About";
 import { useCustomCursor } from "./hooks/useCustomCursor";
@@ -45,7 +45,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/post" element={<PostPage />} />
-            <Route path="/game" element={<GamePage />} />
+            <Route path="/game" element={<Navigate to="/" replace />} />
             <Route path="/music" element={<MusicPage />} />
             <Route path="/code" element={<CodePage />} />
             <Route path="/diary" element={<DiaryPage />} />

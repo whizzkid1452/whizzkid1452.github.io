@@ -16,44 +16,71 @@ export function SidebarMenu({ menuItems, onItemClick }: SidebarMenuProps) {
       {menuItems.map((item, index) => {
         const Icon = item.icon;
         const isActive = location.pathname === item.path;
+        const isDisabled = item.disabled;
         
         return (
           <motion.div
             key={item.label}
             initial={{ x: -50, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
+            animate={{ x: 0, opacity: isDisabled ? 0.5 : 1 }}
             transition={{ delay: index * 0.1 }}
-            whileHover={{ x: 8, scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={isDisabled ? {} : { x: 8, scale: 1.05 }}
+            whileTap={isDisabled ? {} : { scale: 0.95 }}
           >
-            <Link
-              to={item.path}
-              onClick={onItemClick}
-              className={`w-full p-3 mb-2 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-3 transition-all block ${
-                isActive 
-                  ? 'bg-[#e91e63] text-white' 
-                  : 'bg-white text-[#1a0033] hover:bg-[#fce4ec]'
-              }`}
-            >
-              <div 
-                className="w-8 h-8 border-2 border-current flex items-center justify-center"
-                style={{ backgroundColor: isActive ? 'white' : item.color }}
+            {isDisabled ? (
+              <div
+                className="w-full p-3 mb-2 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-3 transition-all block bg-gray-200 text-gray-500 cursor-not-allowed"
+                title="개발 중입니다"
               >
-                <Icon 
-                  className="w-5 h-5" 
-                  style={{ 
-                    color: isActive ? item.color : 'white',
-                    imageRendering: "pixelated" 
-                  }} 
-                />
+                <div 
+                  className="w-8 h-8 border-2 border-current flex items-center justify-center"
+                  style={{ backgroundColor: item.color }}
+                >
+                  <Icon 
+                    className="w-5 h-5" 
+                    style={{ 
+                      color: 'white',
+                      imageRendering: "pixelated" 
+                    }} 
+                  />
+                </div>
+                <span 
+                  className="text-[10px]"
+                  style={{ fontFamily: "'Press Start 2P', monospace" }}
+                >
+                  {item.label}
+                </span>
               </div>
-              <span 
-                className="text-[10px]"
-                style={{ fontFamily: "'Press Start 2P', monospace" }}
+            ) : (
+              <Link
+                to={item.path}
+                onClick={onItemClick}
+                className={`w-full p-3 mb-2 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-3 transition-all block ${
+                  isActive 
+                    ? 'bg-[#e91e63] text-white' 
+                    : 'bg-white text-[#1a0033] hover:bg-[#fce4ec]'
+                }`}
               >
-                {item.label}
-              </span>
-            </Link>
+                <div 
+                  className="w-8 h-8 border-2 border-current flex items-center justify-center"
+                  style={{ backgroundColor: isActive ? 'white' : item.color }}
+                >
+                  <Icon 
+                    className="w-5 h-5" 
+                    style={{ 
+                      color: isActive ? item.color : 'white',
+                      imageRendering: "pixelated" 
+                    }} 
+                  />
+                </div>
+                <span 
+                  className="text-[10px]"
+                  style={{ fontFamily: "'Press Start 2P', monospace" }}
+                >
+                  {item.label}
+                </span>
+              </Link>
+            )}
           </motion.div>
         );
       })}

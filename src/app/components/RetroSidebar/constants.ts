@@ -25,7 +25,7 @@ export const MENU_ITEMS: MenuItem[] = [
   { icon: FileText, label: "post", color: "#ff5722", path: PAGE_ROUTES.post },
   { icon: Music, label: "music", color: "#00bcd4", path: PAGE_ROUTES.music },
   { icon: BookOpen, label: "diary", color: "#ff9800", path: PAGE_ROUTES.diary },
-  { icon: Gamepad2, label: "game", color: "#9c27b0", path: PAGE_ROUTES.game },
+  { icon: Gamepad2, label: "game", color: "#9c27b0", path: PAGE_ROUTES.game, disabled: true },
   { icon: Info, label: "about", color: "#607d8b", path: PAGE_ROUTES.about },
   { icon: Code, label: "code", color: "#4caf50", path: PAGE_ROUTES.code },
 ];

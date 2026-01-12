@@ -5,6 +5,7 @@ export interface MenuItem {
   label: string;
   color: string;
   path: string;
+  disabled?: boolean;
 }
 
 export interface SidebarContentProps {
