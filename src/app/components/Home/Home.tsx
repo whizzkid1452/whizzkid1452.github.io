@@ -1,5 +1,5 @@
 import React from "react";
-import { RetroDateClock } from "./RetroDateClock";
+import { RetroDateClock } from "./clock/RetroDateClock";
 import { RetroPlanner } from "./RetroPlanner";
 import { HeroSection } from "./HeroSection";
 
