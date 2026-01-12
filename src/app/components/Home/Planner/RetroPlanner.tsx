@@ -12,7 +12,6 @@ import { RetroPlannerTitleBar } from "./RetroPlanner.TitleBar";
 import { RetroPlannerMenuBar } from "./RetroPlanner.MenuBar";
 import { RetroPlannerToolbox } from "./RetroPlanner.Toolbox";
 import { RetroPlannerCanvasDecorations } from "./RetroPlanner.CanvasDecorations";
-import { RetroPlannerDateNavigator } from "./RetroPlanner.DateNavigator";
 import { RetroPlannerWeekView } from "./RetroPlanner.WeekView";
 import { RetroPlannerMonthView } from "./RetroPlanner.MonthView";
 import { RetroPlannerStats } from "./RetroPlanner.Stats";
@@ -113,16 +112,6 @@ export function RetroPlanner() {
                       <RetroPlannerCanvasDecorations />
 
                       <div className="relative z-10 p-4 min-h-[400px]">
-                        <RetroPlannerDateNavigator
-                          viewMode={viewMode === "today" ? "week" : viewMode}
-                          displayDate={displayDate}
-                          monthDisplay={monthDisplay}
-                          onPrevPeriod={handlePrevPeriod}
-                          onNextPeriod={handleNextPeriod}
-                          onToday={handleToday}
-                          onViewModeChange={(mode) => setViewMode(mode as "today" | "week" | "month")}
-                        />
-
                         {viewMode === "today" && (
                           <div className="mb-4">
                             <div className="text-center py-4">
