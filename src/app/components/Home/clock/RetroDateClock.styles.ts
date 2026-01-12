@@ -96,14 +96,15 @@ export function getCenterTextStyle(fontSize: string) {
   return {
     fontFamily: "'DungGeunMo', monospace",
     fontSize,
-    fill: "#FFFFFF",
     fontWeight: "bold",
     stroke: "#FF1493",
-    strokeWidth: "0.3",
+    strokeWidth: "0.4",
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
     paintOrder: "stroke fill",
   };
 }
 
 export const centerTextStyles = {
-  container: "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10",
+  container: "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10 drop-shadow-[0_0_4px_rgba(255,20,147,0.6)]",
 } as const;
