@@ -24,7 +24,7 @@ color: from-[#ff1493] to-[#ff69b4]
 
 ### 기본 컴포넌트 구조
 
-\`\`\`
+```
 export default function App({ Component, pageProps }) {
   return (
     <>
@@ -47,15 +47,15 @@ export default function App({ Component, pageProps }) {
     </>
   )
 }
-\`\`\`
+```
 
 ### 인라인 코드 예제
 
-컴포넌트를 만들 때는 \`useState\`와 \`useEffect\`를 활용하세요!
+컴포넌트를 만들 때는 `useState`와 `useEffect`를 활용하세요!
 
 ### 핑크 픽셀 버튼 만들기
 
-\`\`\`
+```
 function PixelButton() {
   const [isHovered, setIsHovered] = useState(false);
   
@@ -69,7 +69,7 @@ function PixelButton() {
     </button>
   );
 }
-\`\`\`
+```
 
 > "코드 한 줄 한 줄에 핑크 감성을 담아보세요!" 💕
 
@@ -79,7 +79,7 @@ function PixelButton() {
 - **스타일링**: Tailwind CSS로 픽셀 감성 연출
 - **애니메이션**: Motion으로 Y2K 효과 추가
 
-\`\`\`
+```
 // 간단한 import 예제
 import { motion } from "motion/react";
 import { useState } from "react";
@@ -94,4 +94,4 @@ const App = () => {
     </motion.div>
   );
 };
-\`\`\`
+```

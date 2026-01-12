@@ -110,7 +110,7 @@ export function RetroMarkdownRenderer({ content }: RetroMarkdownRendererProps) {
         ),
 
         // Inline Code
-        code: ({ inline, children }) => {
+        code: ({ inline, className, children, ...props }) => {
           if (inline) {
             return (
               <code
@@ -125,16 +125,42 @@ export function RetroMarkdownRenderer({ content }: RetroMarkdownRendererProps) {
               </code>
             );
           }
-          return children;
+          // Code block - return as-is so pre can handle it
+          return (
+            <code className={className} {...props}>
+              {children}
+            </code>
+          );
         },
 
         // Code Block
         pre: ({ children }) => {
-          const codeContent = typeof children === 'object' && 
-            children !== null && 
-            'props' in children ? 
-              String(children.props.children).trim() : 
-              String(children).trim();
+          // Extract code content from the code element inside pre
+          // react-markdown renders code blocks as <pre><code>content</code></pre>
+          let codeContent = '';
+          
+          const extractText = (node: any): string => {
+            if (typeof node === 'string') {
+              return node;
+            }
+            if (typeof node === 'number') {
+              return String(node);
+            }
+            if (Array.isArray(node)) {
+              return node.map(extractText).join('');
+            }
+            if (node && typeof node === 'object') {
+              if ('props' in node && node.props) {
+                return extractText(node.props.children);
+              }
+              if ('children' in node) {
+                return extractText(node.children);
+              }
+            }
+            return '';
+          };
+          
+          codeContent = extractText(children).trim();
           
           const lines = codeContent.split('\n');
           

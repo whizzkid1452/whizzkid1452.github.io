@@ -153,57 +153,6 @@ export function RetroPostDetail({
         <div className="p-6 md:p-8 lg:p-12">
           <RetroMarkdownRenderer content={content} />
 
-          {/* Extended Content */}
-          <div className="space-y-6">
-            <div className="bg-gradient-to-br from-[#fce4ec] to-[#f8bbd0] p-4 md:p-6 border-4 border-[#ec407a] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-              <h3
-                className="text-[#e91e63] text-sm md:text-base mb-3"
-                style={{ fontFamily: "'Press Start 2P', monospace" }}
-              >
-                TIP 1
-              </h3>
-              <p
-                className="text-[#1a0033] text-xs md:text-sm leading-relaxed"
-                style={{ fontFamily: "'DungGeunMo', monospace" }}
-              >
-                시작은 간단한 도구부터! Use simple tools like MS Paint or Aseprite.
-                복잡한 기능보다 기본기가 중요합니다.
-              </p>
-            </div>
-
-            <div className="bg-gradient-to-br from-[#e1f5fe] to-[#b3e5fc] p-4 md:p-6 border-4 border-[#00bcd4] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-              <h3
-                className="text-[#00bcd4] text-sm md:text-base mb-3"
-                style={{ fontFamily: "'Press Start 2P', monospace" }}
-              >
-                TIP 2
-              </h3>
-              <p
-                className="text-[#1a0033] text-xs md:text-sm leading-relaxed"
-                style={{ fontFamily: "'DungGeunMo', monospace" }}
-              >
-                제한된 컬러 팔레트를 사용하세요. Limitations breed creativity!
-                8색부터 시작해서 점차 늘려가는 것을 추천합니다.
-              </p>
-            </div>
-
-            <div className="bg-gradient-to-br from-[#f3e5f5] to-[#e1bee7] p-4 md:p-6 border-4 border-[#9c27b0] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-              <h3
-                className="text-[#9c27b0] text-sm md:text-base mb-3"
-                style={{ fontFamily: "'Press Start 2P', monospace" }}
-              >
-                TIP 3
-              </h3>
-              <p
-                className="text-[#1a0033] text-xs md:text-sm leading-relaxed"
-                style={{ fontFamily: "'DungGeunMo', monospace" }}
-              >
-                매일 조금씩 연습하기! Practice makes pixel perfect. 하루 30분씩
-                꾸준히 하면 한 달 뒤 놀라운 발전을 경험할 수 있습니다.
-              </p>
-            </div>
-          </div>
-
           {/* Tags */}
           <div className="flex flex-wrap gap-2 mt-8 pt-6 border-t-2 border-[#fce4ec]">
             {tags.map((tag) => (

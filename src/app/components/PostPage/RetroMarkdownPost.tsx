@@ -314,37 +314,197 @@ export function RetroMarkdownPost({ onBack }: RetroMarkdownPostProps) {
             </p>
 
             {/* Code Block */}
-            <div className="bg-[#2d2d2d] border-4 border-[#00ff00] p-4 md:p-6 shadow-[6px_6px_0px_0px_rgba(0,255,0,0.3)] overflow-x-auto" style={{ imageRendering: "pixelated" }}>
-              <div className="flex items-center gap-2 mb-3 pb-2 border-b-2 border-[#00ff00]/30">
-                <Code className="w-4 h-4 text-[#00ff00]" />
-                <span className="text-[#00ff00] text-xs" style={{ fontFamily: "'Press Start 2P', monospace" }}>
-                  CODE BLOCK
-                </span>
+            <div className="my-8 bg-[#c0c0c0] border-4 border-[#ff1493] shadow-[8px_8px_0px_0px_rgba(255,20,147,0.5)] overflow-hidden" style={{ imageRendering: "pixelated" }}>
+              {/* Window Title Bar */}
+              <div 
+                className="bg-gradient-to-r from-[#ff1493] to-[#ff69b4] px-3 py-2 border-b-4 border-[#c71585] flex items-center justify-between"
+                style={{
+                  boxShadow: "inset -1px -1px 0 0 rgba(0,0,0,0.5), inset 1px 1px 0 0 rgba(255,255,255,0.5)"
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-white border-2 border-black flex items-center justify-center">
+                    <Code className="w-3 h-3 text-[#ff1493]" />
+                  </div>
+                  <span className="text-white text-xs" style={{ fontFamily: "'Press Start 2P', monospace", textShadow: "2px 2px 0px rgba(0,0,0,0.5)" }}>
+                    CODE_BLOCK.EXE
+                  </span>
+                  <div className="flex gap-1 ml-2">
+                    <div className="w-2 h-2 bg-[#00ff00] border border-black animate-pulse"></div>
+                    <div className="w-2 h-2 bg-[#ffff00] border border-black"></div>
+                    <div className="w-2 h-2 bg-[#ff00ff] border border-black"></div>
+                  </div>
+                </div>
+                <div className="flex gap-1">
+                  <button className="w-5 h-5 bg-[#c0c0c0] border-2 border-black flex items-center justify-center text-[10px] hover:bg-[#a0a0a0] font-bold"
+                    style={{ boxShadow: "inset -1px -1px 0 0 #000000, inset 1px 1px 0 0 #ffffff" }}>
+                    _
+                  </button>
+                  <button className="w-5 h-5 bg-[#c0c0c0] border-2 border-black flex items-center justify-center text-[10px] hover:bg-[#a0a0a0] font-bold"
+                    style={{ boxShadow: "inset -1px -1px 0 0 #000000, inset 1px 1px 0 0 #ffffff" }}>
+                    □
+                  </button>
+                  <button className="w-5 h-5 bg-[#c0c0c0] border-2 border-black flex items-center justify-center text-[10px] hover:bg-[#ff0000] font-bold"
+                    style={{ boxShadow: "inset -1px -1px 0 0 #000000, inset 1px 1px 0 0 #ffffff" }}>
+                    ×
+                  </button>
+                </div>
               </div>
-              <pre className="text-[#00ff00] text-xs md:text-sm overflow-x-auto" style={{ fontFamily: "'VT323', monospace" }}>
-{`export default function App({ Component, pageProps }) {
-  return (
-    <>
-      <Head>
-        <link
-          rel="alternate"
-          type="application/rss+xml"
-          title="RSS"
-          href="/feed.xml"
-        />
-        <link
-          rel="preload"
-          href="/fonts/Inter-roman.latin.var.woff2"
-          as="font"
-          type="font/woff2"
-          crossOrigin="anonymous"
-        />
-      </Head>
-      <Component {...pageProps} />
-    </>
-  )
-}`}
-              </pre>
+
+              {/* Menu Bar */}
+              <div 
+                className="bg-[#c0c0c0] px-3 py-1 border-b-2 border-[#808080] flex gap-3 text-[10px]"
+                style={{ 
+                  fontFamily: "'VT323', monospace",
+                  boxShadow: "inset -1px -1px 0 0 #000000, inset 1px 1px 0 0 #ffffff"
+                }}
+              >
+                <span className="hover:bg-[#ff1493] hover:text-white px-2 cursor-pointer border-2 border-transparent hover:border-black">File</span>
+                <span className="hover:bg-[#ff1493] hover:text-white px-2 cursor-pointer border-2 border-transparent hover:border-black">Edit</span>
+                <span className="hover:bg-[#ff1493] hover:text-white px-2 cursor-pointer border-2 border-transparent hover:border-black">View</span>
+                <span className="hover:bg-[#ff1493] hover:text-white px-2 cursor-pointer border-2 border-transparent hover:border-black">Help</span>
+              </div>
+              
+              {/* Code Content */}
+              <div className="bg-gradient-to-br from-[#1a0033] via-[#2d0a4e] to-[#1a0033] p-4 md:p-6">
+                <div className="bg-black/40 border-4 border-[#ff69b4]/30 p-4 shadow-[inset_4px_4px_8px_rgba(255,20,147,0.2)]">
+                  <div className="flex gap-2">
+                    {/* Line Numbers */}
+                    <div className="pr-4 border-r-4 border-[#ff1493]/50 select-none bg-[#2d0a4e]/50 px-2">
+                      {Array.from({ length: 15 }, (_, i) => (
+                        <div
+                          key={i}
+                          className="text-[#ff69b4] text-sm leading-relaxed text-right py-[2px]"
+                          style={{ fontFamily: "'Press Start 2P', monospace", fontSize: "10px" }}
+                        >
+                          {String(i + 1).padStart(3, '0')}
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {/* Code Lines */}
+                    <div className="flex-1 overflow-x-auto">
+                      <pre className="text-sm leading-relaxed" style={{ fontFamily: "'VT323', monospace" }}>
+                        {[
+                          'export default function App({ Component, pageProps }) {',
+                          '  return (',
+                          '    <>',
+                          '      <Head>',
+                          '        <link',
+                          '          rel="alternate"',
+                          '          type="application/rss+xml"',
+                          '          title="RSS"',
+                          '          href="/feed.xml"',
+                          '        />',
+                          '        <link',
+                          '          rel="preload"',
+                          '          href="/fonts/Inter-roman.latin.var.woff2"',
+                          '          as="font"',
+                          '          type="font/woff2"',
+                          '          crossOrigin="anonymous"',
+                          '        />',
+                          '      </Head>',
+                          '      <Component {...pageProps} />',
+                          '    </>',
+                          '  )',
+                          '}'
+                        ].map((line, index) => {
+                          // Enhanced syntax highlighting for pink pixel theme
+                          
+                          // Comments
+                          if (line.trim().startsWith('//') || line.trim().startsWith('/*') || line.trim().startsWith('*')) {
+                            return (
+                              <div key={index} className="text-[#bd93f9] py-[2px] opacity-70">
+                                💭 {line}
+                              </div>
+                            );
+                          }
+                          
+                          // Function/Class declarations
+                          if (line.includes('function') || line.includes('class') || line.includes('const') || line.includes('let') || line.includes('var')) {
+                            return (
+                              <div key={index} className="py-[2px]">
+                                <span className="text-[#ff79c6] font-bold">★ </span>
+                                <span className="text-[#ff79c6]">{line}</span>
+                              </div>
+                            );
+                          }
+                          
+                          // Import/Export
+                          if (line.includes('import') || line.includes('export')) {
+                            return (
+                              <div key={index} className="text-[#8be9fd] py-[2px]">
+                                ⚡ {line}
+                              </div>
+                            );
+                          }
+                          
+                          // Return statements
+                          if (line.includes('return')) {
+                            return (
+                              <div key={index} className="text-[#50fa7b] py-[2px]">
+                                ← {line}
+                              </div>
+                            );
+                          }
+                          
+                          // Strings
+                          if (line.includes('"') || line.includes("'") || line.includes('`')) {
+                            return (
+                              <div key={index} className="text-[#f1fa8c] py-[2px]">
+                                ✿ {line}
+                              </div>
+                            );
+                          }
+                          
+                          // JSX tags
+                          if (line.includes('<') && line.includes('>')) {
+                            return (
+                              <div key={index} className="text-[#ffb86c] py-[2px]">
+                                ♦ {line}
+                              </div>
+                            );
+                          }
+                          
+                          // Default
+                          return (
+                            <div key={index} className="text-[#f8f8f2] py-[2px]">
+                              {line || ' '}
+                            </div>
+                          );
+                        })}
+                      </pre>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Status Bar */}
+              <div 
+                className="bg-[#c0c0c0] px-4 py-2 border-t-2 border-[#808080] flex items-center justify-between text-[10px]"
+                style={{ 
+                  fontFamily: "'VT323', monospace",
+                  boxShadow: "inset -1px -1px 0 0 #000000, inset 1px 1px 0 0 #ffffff"
+                }}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 bg-[#ff1493] border border-black"></div>
+                    <span className="text-black">LINES: 20</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 bg-[#00ff00] border border-black animate-pulse"></div>
+                    <span className="text-black">READY</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-black">UTF-8</span>
+                  <span className="text-[#808080]">│</span>
+                  <span className="text-black">CRLF</span>
+                  <span className="text-[#808080]">│</span>
+                  <span className="text-black">PIXEL MODE</span>
+                </div>
+              </div>
             </div>
           </div>
 
