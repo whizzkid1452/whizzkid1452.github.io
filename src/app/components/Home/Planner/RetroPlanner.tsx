@@ -112,19 +112,6 @@ export function RetroPlanner() {
                       <RetroPlannerCanvasDecorations />
 
                       <div className="relative z-10 p-4 min-h-[400px]">
-                        {viewMode === "today" && (
-                          <div className="mb-4">
-                            <div className="text-center py-4">
-                              <p className="text-pink-600 text-sm mb-2" style={{ fontFamily: "'Press Start 2P'" }}>
-                                {displayDate.full}
-                              </p>
-                              <p className="text-pink-500 text-xs" style={{ fontFamily: "'DungGeunMo'" }}>
-                                {displayDate.weekdayKo}요일 • {displayDate.weekdayEn}
-                              </p>
-                            </div>
-                          </div>
-                        )}
-
                         {viewMode === "week" && (
                           <RetroPlannerWeekView
                             weekDates={weekDates}

@@ -48,10 +48,10 @@ export function RetroPlannerMenuBar({ viewMode, onViewModeChange, displayDate, m
         whileHover={{ backgroundColor: "#FFB6C1", color: "#C2185B" }}
         onClick={() => {
           onToday();
-          onViewModeChange("today");
+          onViewModeChange("week");
         }}
         className={buttonStyles.menuItem}
-        style={viewMode === "today" ? { backgroundColor: "#FFB6C1", color: "#C2185B" } : {}}
+        style={viewMode === "week" ? { backgroundColor: "#FFB6C1", color: "#C2185B" } : {}}
       >
         Today
       </motion.button>
