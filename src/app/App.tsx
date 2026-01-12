@@ -12,7 +12,7 @@ const PostPage = lazy(() => import("./components/PostPage/PostPage").then(module
 const GamePage = lazy(() => import("./components/GamePage/GamePage").then(module => ({ default: module.GamePage })));
 const MusicPage = lazy(() => import("./components/MusicPage/MusicPage").then(module => ({ default: module.MusicPage })));
 const CodePage = lazy(() => import("./components/CodePage/CodePage").then(module => ({ default: module.CodePage })));
-const DiaryPage = lazy(() => import("./components/DiaryPage/DiaryPage").then(module => ({ default: module.DiaryPage })));
+const GuestBookPage = lazy(() => import("./components/GuestBookPage/GuestBookPage").then(module => ({ default: module.GuestBookPage })));
 
 /**
  * App 컴포넌트
@@ -48,7 +48,7 @@ export default function App() {
             <Route path="/game" element={<Navigate to="/" replace />} />
             <Route path="/music" element={<MusicPage />} />
             <Route path="/code" element={<CodePage />} />
-            <Route path="/diary" element={<DiaryPage />} />
+            <Route path="/diary" element={<GuestBookPage />} />
             <Route path="/about" element={<About />} />
           </Routes>
         </Suspense>

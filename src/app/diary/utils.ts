@@ -1,26 +1,24 @@
 import { parseFrontmatter } from '../posts/utils';
 
 /**
- * DiaryEntry 타입 정의
+ * GuestBookEntry 타입 정의
  */
-export interface DiaryEntry {
+export interface GuestBookEntry {
   id: number;
   date: string;
   time: string;
-  title: string;
-  titleKo: string;
-  content: string;
-  mood: "happy" | "neutral" | "sad";
-  weather: string;
+  name: string;
+  message: string;
+  emoji?: string;
 }
 
 /**
- * 마크다운 파일을 DiaryEntry 객체로 변환
+ * 마크다운 파일을 GuestBookEntry 객체로 변환
  */
-export function markdownToDiary(
+export function markdownToGuestBook(
   markdownContent: string,
   filename: string
-): DiaryEntry {
+): GuestBookEntry {
   const { frontmatter, body } = parseFrontmatter(markdownContent);
 
   // 날짜와 시간 파싱
@@ -43,10 +41,8 @@ export function markdownToDiary(
     id,
     date: formattedDate || new Date().toLocaleDateString("ko-KR").replace(/\. /g, ".").replace(".", ""),
     time: timeStr || new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", hour12: false }),
-    title: frontmatter.title || '',
-    titleKo: frontmatter.titleKo || frontmatter.title || '',
-    content: body.trim(),
-    mood: (frontmatter.mood || 'neutral') as "happy" | "neutral" | "sad",
-    weather: frontmatter.weather || '맑음 ☀️ Sunny',
+    name: frontmatter.name || '익명 • Anonymous',
+    message: body.trim(),
+    emoji: frontmatter.emoji || '💌',
   };
 }
