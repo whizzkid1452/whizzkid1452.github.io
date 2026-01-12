@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Task } from "./RetroPlanner.types";
+import type { Task, PlannerMode } from "./RetroPlanner.types";
 import { tasksPerPage } from "./RetroPlanner.constants";
 import {
   formatDate,
@@ -52,6 +52,7 @@ export function useRetroPlanner() {
   const [showEditor, setShowEditor] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<"week" | "month">("week");
+  const [plannerMode, setPlannerMode] = useState<PlannerMode>("All");
   const [currentPage, setCurrentPage] = useState(1);
   const [isMinimized, setIsMinimized] = useState(false);
   const [hoveredDate, setHoveredDate] = useState<string | null>(null);
@@ -143,6 +144,8 @@ export function useRetroPlanner() {
     setShowEditor,
     viewMode,
     setViewMode,
+    plannerMode,
+    setPlannerMode,
     currentPage,
     isMinimized,
     setIsMinimized,

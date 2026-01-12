@@ -46,3 +46,12 @@ export interface Tool {
   label: string;
   color: string;
 }
+
+export type PlannerMode = "All" | "Dev" | "Art" | "CEO" | "Act" | "Exc";
+
+export interface PlannerModeOption {
+  mode: PlannerMode;
+  label: string;
+  icon: ComponentType<{ className?: string; style?: CSSProperties }>;
+  color: string;
+}

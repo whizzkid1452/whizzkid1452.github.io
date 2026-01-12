@@ -1,8 +1,8 @@
 import { 
   Pencil, Brush, Square, Circle as CircleIcon, Eraser, 
-  Droplet, Type, Plus
+  Droplet, Type, Plus, Code, Palette, Briefcase, Activity, Target, Grid3x3
 } from "lucide-react";
-import { Tool } from "./RetroPlanner.types";
+import { Tool, PlannerModeOption } from "./RetroPlanner.types";
 
 export const paletteColors = [
   "#FF1493", "#FF69B4", "#FFB6C1", "#FFC0CB", "#FFE4E1", 
@@ -33,3 +33,12 @@ export const monthNames = ["1월", "2월", "3월", "4월", "5월", "6월", "7월
 export const monthNamesEn = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"] as const;
 
 export const menuItems = ["File", "Edit", "View", "Image", "Colors", "Help"] as const;
+
+export const plannerModes: PlannerModeOption[] = [
+  { mode: "All", label: "All", icon: Grid3x3, color: "#FFB6C1" },
+  { mode: "Dev", label: "Dev", icon: Code, color: "#3B82F6" },
+  { mode: "Art", label: "Art", icon: Palette, color: "#EC4899" },
+  { mode: "CEO", label: "CEO", icon: Briefcase, color: "#8B5CF6" },
+  { mode: "Act", label: "Act", icon: Activity, color: "#10B981" },
+  { mode: "Exc", label: "Exc", icon: Target, color: "#F59E0B" },
+] as const;

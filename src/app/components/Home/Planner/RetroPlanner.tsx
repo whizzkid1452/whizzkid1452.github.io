@@ -29,6 +29,8 @@ export function RetroPlanner() {
     setShowEditor,
     viewMode,
     setViewMode,
+    plannerMode,
+    setPlannerMode,
     currentPage,
     isMinimized,
     setIsMinimized,
@@ -82,7 +84,11 @@ export function RetroPlanner() {
               <RetroPlannerMenuBar />
 
               <div className="flex">
-                <RetroPlannerToolbox onAddTask={() => setShowEditor(true)} />
+                <RetroPlannerToolbox 
+                  onAddTask={() => setShowEditor(true)}
+                  plannerMode={plannerMode}
+                  onPlannerModeChange={setPlannerMode}
+                />
 
                 <div className={containerStyles.canvas}>
                   <div className={containerStyles.canvasArea} style={{ borderColor: "#808080" }}>
