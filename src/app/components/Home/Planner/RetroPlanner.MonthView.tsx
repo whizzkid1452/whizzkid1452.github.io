@@ -83,28 +83,28 @@ export function RetroPlannerMonthView({
                   </div>
                   {day.isCurrentMonth && dayTasks.length > 0 && (
                     <div className="w-full space-y-0.5 mt-1">
-                      {dayTasks.slice(0, 2).map((task) => {
+                      {dayTasks.slice(0, 4).map((task) => {
                         return (
                           <div
                             key={task.id}
-                            className={`text-[6px] px-1 py-0.5 truncate border ${getTaskPriorityStyle(task.priority, task.completed)} ${day.isSelected ? "opacity-90" : ""}`}
+                            className={`text-[8px] px-1 py-0.5 truncate border ${getTaskPriorityStyle(task.priority, task.completed)} ${day.isSelected ? "opacity-90" : ""}`}
                             style={{ ...getFontStyle("'DungGeunMo'"), imageRendering: "pixelated" }}
                             title={task.title}
                           >
                             <span className="truncate">
-                              {task.time} {task.title.length > 6 ? task.title.substring(0, 6) + "..." : task.title}
+                              {task.time} {task.title.length > 10 ? task.title.substring(0, 10) + "..." : task.title}
                             </span>
                           </div>
                         );
                       })}
-                      {dayTasks.length > 2 && (
+                      {dayTasks.length > 4 && (
                         <div
-                          className={`text-[6px] px-1 text-center ${
+                          className={`text-[8px] px-1 text-center ${
                             day.isSelected ? "text-white" : "text-[#FF1493]"
                           }`}
                           style={getFontStyle("'Press Start 2P'")}
                         >
-                          +{dayTasks.length - 2}
+                          +{dayTasks.length - 4}
                         </div>
                       )}
                     </div>
