@@ -1,6 +1,6 @@
 import { Task, WeekDate, MonthDate, DisplayDate, MonthDisplay } from "./RetroPlanner.types";
 import { weekdays, weekdaysEn, monthNames, monthNamesEn } from "./RetroPlanner.constants";
-import type { GoogleCalendarEvent } from "../../../lib/googleCalendar";
+import type { GoogleCalendarEvent } from "@/lib/googleCalendar";
 
 export function formatDate(date: Date): string {
   const year = date.getFullYear();
@@ -157,6 +157,7 @@ export function convertGoogleCalendarEventToTask(event: GoogleCalendarEvent): Ta
     priority: "medium",
     completed: false,
     date: eventDate,
+    googleEventId: event.id,
   };
 }
 

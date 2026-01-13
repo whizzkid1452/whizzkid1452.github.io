@@ -11,6 +11,7 @@ import {
   getDateRangeForViewMode,
 } from "./RetroPlanner.utils";
 import { useGoogleCalendar } from "../../../hooks/useGoogleCalendar";
+import { deleteCalendarEvent, updateCalendarEvent, createCalendarEvent } from "@/lib/googleCalendar";
 
 const initialTasks: Task[] = [
   {
@@ -67,6 +68,7 @@ export function useRetroPlanner() {
     isLoadingEvents: isLoadingCalendar,
     isAuthenticated,
     errorMessage,
+    refreshCalendarEvents,
   } = useGoogleCalendar({
     timeMin,
     timeMax,
@@ -104,28 +106,94 @@ export function useRetroPlanner() {
     setSelectedDate(new Date());
   };
 
-  const handleSaveTask = (taskData: {
+  const handleSaveTask = async (taskData: {
     title: string;
     time: string;
     category: string;
     priority: "high" | "medium" | "low";
   }) => {
+    const taskDate = formatDate(selectedDate);
+    const [hours, minutes] = taskData.time.split(':').map(Number);
+    const startDateTime = new Date(selectedDate);
+    startDateTime.setHours(hours, minutes, 0, 0);
+    const endDateTime = new Date(startDateTime);
+    endDateTime.setHours(hours + 1, minutes, 0, 0);
+
+    let googleEventId: string | undefined;
+
+    if (isAuthenticated) {
+      try {
+        const createdEvent = await createCalendarEvent({
+          summary: taskData.title,
+          description: taskData.category,
+          start: {
+            dateTime: startDateTime.toISOString(),
+            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          },
+          end: {
+            dateTime: endDateTime.toISOString(),
+            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          },
+        });
+        googleEventId = createdEvent.id;
+        await refreshCalendarEvents();
+      } catch (error) {
+        console.error("구글 캘린더 이벤트 생성 실패:", error);
+        alert("구글 캘린더에 일정 추가에 실패했습니다. 로컬에만 저장됩니다.");
+      }
+    }
+
     const newTask: Task = {
       id: Date.now(),
       ...taskData,
       completed: false,
-      date: formatDate(selectedDate),
+      date: taskDate,
+      googleEventId,
     };
     setTasks([...tasks, newTask]);
     setCurrentPage(1);
   };
 
-  const handleToggleTask = (id: number) => {
-    setTasks(tasks.map((task) => (task.id === id ? { ...task, completed: !task.completed } : task)));
+  const handleToggleTask = async (id: number) => {
+    const task = allTasks.find((t) => t.id === id);
+    if (!task) return;
+
+    if (task.googleEventId) {
+      try {
+        const newTitle = task.completed 
+          ? task.title.replace(/^✓\s*/, '') 
+          : `✓ ${task.title}`;
+        await updateCalendarEvent(task.googleEventId, {
+          summary: newTitle,
+        });
+        await refreshCalendarEvents();
+      } catch (error) {
+        console.error("구글 캘린더 이벤트 완료 처리 실패:", error);
+        alert("구글 캘린더 이벤트 완료 처리에 실패했습니다.");
+      }
+    } else {
+      setTasks(tasks.map((task) => (task.id === id ? { ...task, completed: !task.completed } : task)));
+    }
   };
 
-  const handleDeleteTask = (id: number) => {
-    setTasks(tasks.filter((task) => task.id !== id));
+  const handleDeleteTask = async (id: number) => {
+    const task = allTasks.find((t) => t.id === id);
+    if (!task) return;
+
+    if (task.googleEventId) {
+      if (!confirm("구글 캘린더에서 이 일정을 삭제하시겠습니까?")) {
+        return;
+      }
+      try {
+        await deleteCalendarEvent(task.googleEventId);
+        await refreshCalendarEvents();
+      } catch (error) {
+        console.error("구글 캘린더 이벤트 삭제 실패:", error);
+        alert("구글 캘린더 이벤트 삭제에 실패했습니다.");
+      }
+    } else {
+      setTasks(tasks.filter((task) => task.id !== id));
+    }
   };
 
   const handlePrevPage = () => {

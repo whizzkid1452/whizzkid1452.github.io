@@ -85,7 +85,7 @@ export function useGoogleCalendar(options: UseGoogleCalendarOptions = {}): UseGo
   const handleSignIn = useCallback(async () => {
     setErrorMessage(null)
     try {
-      await signInWithGoogleForCalendar()
+      await signInWithGoogleForCalendar(false)
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Google 로그인 중 오류가 발생했습니다.'
       setErrorMessage(errorMessage)

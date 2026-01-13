@@ -136,3 +136,109 @@ export async function fetchUpcomingCalendarEvents(
 
   return calendarEventsResponse.items
 }
+
+export async function deleteCalendarEvent(
+  eventId: string,
+  calendarId: string = 'primary'
+): Promise<void> {
+  const googleAccessToken = await getGoogleAccessToken()
+
+  if (!googleAccessToken) {
+    throw new Error('Google 로그인이 필요하거나, 캘린더 권한이 없습니다.')
+  }
+
+  const apiUrl = `${GOOGLE_CALENDAR_API_BASE_URL}/calendars/${calendarId}/events/${eventId}`
+
+  const response = await fetch(apiUrl, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${googleAccessToken}`,
+    },
+  })
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}))
+    throw new Error(
+      `캘린더 이벤트 삭제 실패: ${response.status} ${response.statusText}. ${errorData.error?.message || ''}`
+    )
+  }
+}
+
+export async function updateCalendarEvent(
+  eventId: string,
+  updates: Partial<GoogleCalendarEvent>,
+  calendarId: string = 'primary'
+): Promise<GoogleCalendarEvent> {
+  const googleAccessToken = await getGoogleAccessToken()
+
+  if (!googleAccessToken) {
+    throw new Error('Google 로그인이 필요하거나, 캘린더 권한이 없습니다.')
+  }
+
+  const apiUrl = `${GOOGLE_CALENDAR_API_BASE_URL}/calendars/${calendarId}/events/${eventId}`
+
+  const response = await fetch(apiUrl, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${googleAccessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(updates),
+  })
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}))
+    throw new Error(
+      `캘린더 이벤트 수정 실패: ${response.status} ${response.statusText}. ${errorData.error?.message || ''}`
+    )
+  }
+
+  const updatedEvent: GoogleCalendarEvent = await response.json()
+  return updatedEvent
+}
+
+export async function createCalendarEvent(
+  eventData: {
+    summary: string
+    description?: string
+    start: {
+      dateTime?: string
+      date?: string
+      timeZone?: string
+    }
+    end: {
+      dateTime?: string
+      date?: string
+      timeZone?: string
+    }
+    location?: string
+  },
+  calendarId: string = 'primary'
+): Promise<GoogleCalendarEvent> {
+  const googleAccessToken = await getGoogleAccessToken()
+
+  if (!googleAccessToken) {
+    throw new Error('Google 로그인이 필요하거나, 캘린더 권한이 없습니다.')
+  }
+
+  const apiUrl = `${GOOGLE_CALENDAR_API_BASE_URL}/calendars/${calendarId}/events`
+
+  const response = await fetch(apiUrl, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${googleAccessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(eventData),
+  })
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}))
+    throw new Error(
+      `캘린더 이벤트 생성 실패: ${response.status} ${response.statusText}. ${errorData.error?.message || ''}`
+    )
+  }
+
+  const createdEvent: GoogleCalendarEvent = await response.json()
+  return createdEvent
+}

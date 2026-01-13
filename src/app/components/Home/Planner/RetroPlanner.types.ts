@@ -6,6 +6,7 @@ export interface Task {
   priority: "high" | "medium" | "low";
   completed: boolean;
   date: string;
+  googleEventId?: string;
 }
 
 export interface WeekDate {
