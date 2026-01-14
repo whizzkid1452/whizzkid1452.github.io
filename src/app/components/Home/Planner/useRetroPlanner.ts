@@ -86,10 +86,13 @@ export function useRetroPlanner() {
   }, [calendarEvents]);
 
   const allTasks = useMemo(() => {
+    if (!isAuthenticated) {
+      return tasks;
+    }
     const googleTaskIds = new Set(googleCalendarTasks.map((task) => task.id));
     const localTasksWithoutDuplicates = tasks.filter((task) => !googleTaskIds.has(task.id));
     return [...localTasksWithoutDuplicates, ...googleCalendarTasks];
-  }, [tasks, googleCalendarTasks]);
+  }, [tasks, googleCalendarTasks, isAuthenticated]);
 
   const selectedDateStr = formatDate(selectedDate);
   const todayTasks = allTasks.filter((task) => task.date === selectedDateStr);
