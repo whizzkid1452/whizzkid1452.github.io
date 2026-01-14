@@ -338,4 +338,29 @@
   .animate-sparkle {
     animation: sparkle 0.8s ease-out forwards;
   }
+  
+  /* 커스텀 스크롤바 - 레트로 핑크 스타일 */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #fce4ec;
+    border-left: 2px solid #ec407a;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, #e91e63, #f06292);
+    border: 2px solid #000;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, #c2185b, #e91e63);
+  }
+  
+  /* Firefox */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #e91e63 #fce4ec;
+  }
 }

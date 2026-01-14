@@ -20,6 +20,8 @@ interface UseGoogleCalendarReturn {
   isLoadingEvents: boolean
   isAuthenticated: boolean
   errorMessage: string | null
+  userName: string | null
+  userEmail: string | null
   handleSignIn: () => Promise<void>
   handleSignOut: () => Promise<void>
   refreshCalendarEvents: () => Promise<void>
@@ -38,11 +40,28 @@ export function useGoogleCalendar(options: UseGoogleCalendarOptions = {}): UseGo
   const [isLoadingEvents, setIsLoadingEvents] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [userName, setUserName] = useState<string | null>(null)
+  const [userEmail, setUserEmail] = useState<string | null>(null)
 
   const checkAuthenticationStatus = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession()
     const hasValidSession = !!(session?.provider_token || session?.provider_refresh_token)
     setIsAuthenticated(hasValidSession)
+    
+    if (session?.user) {
+      // Google OAuth에서 제공하는 메타데이터에서 이름 가져오기
+      const fullName = session.user.user_metadata?.full_name || 
+                       session.user.user_metadata?.name || 
+                       null
+      const email = session.user.email || null
+      
+      setUserName(fullName)
+      setUserEmail(email)
+    } else {
+      setUserName(null)
+      setUserEmail(null)
+    }
+    
     return hasValidSession
   }, [])
 
@@ -101,6 +120,8 @@ export function useGoogleCalendar(options: UseGoogleCalendarOptions = {}): UseGo
       }
       setIsAuthenticated(false)
       setCalendarEvents([])
+      setUserName(null)
+      setUserEmail(null)
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : '로그아웃 중 오류가 발생했습니다.'
       setErrorMessage(errorMessage)
@@ -123,6 +144,8 @@ export function useGoogleCalendar(options: UseGoogleCalendarOptions = {}): UseGo
       } else if (event === 'SIGNED_OUT') {
         setIsAuthenticated(false)
         setCalendarEvents([])
+        setUserName(null)
+        setUserEmail(null)
       }
     })
 
@@ -142,6 +165,8 @@ export function useGoogleCalendar(options: UseGoogleCalendarOptions = {}): UseGo
     isLoadingEvents,
     isAuthenticated,
     errorMessage,
+    userName,
+    userEmail,
     handleSignIn,
     handleSignOut,
     refreshCalendarEvents: loadCalendarEvents,

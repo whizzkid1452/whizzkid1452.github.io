@@ -8,8 +8,6 @@ export function GoogleCalendarExample() {
     isLoadingEvents,
     isAuthenticated,
     errorMessage,
-    handleSignIn,
-    handleSignOut,
     refreshCalendarEvents,
   } = useGoogleCalendar()
 
@@ -27,32 +25,15 @@ export function GoogleCalendarExample() {
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Google 캘린더</h2>
-        <div className="flex gap-2">
-          {isAuthenticated ? (
-            <>
-              <button
-                onClick={refreshCalendarEvents}
-                disabled={isLoadingEvents}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
-              >
-                새로고침
-              </button>
-              <button
-                onClick={handleSignOut}
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-              >
-                로그아웃
-              </button>
-            </>
-          ) : (
-            <button
-              onClick={handleSignIn}
-              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-            >
-              Google로 로그인
-            </button>
-          )}
-        </div>
+        {isAuthenticated && (
+          <button
+            onClick={refreshCalendarEvents}
+            disabled={isLoadingEvents}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+          >
+            새로고침
+          </button>
+        )}
       </div>
 
       {errorMessage && (
