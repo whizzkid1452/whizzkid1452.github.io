@@ -1,27 +1,12 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Search, ChevronDown, Tag } from "lucide-react";
-import { loadPosts } from "../../../../posts/loadPosts";
+import { ChevronDown, Tag } from "lucide-react";
+import { useTagFilter } from "../../hooks/useTagFilter";
+import { CategoryTags } from "../shared/CategoryTags";
 
 export function SidebarCategories() {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [tagSearchQuery, setTagSearchQuery] = useState("");
-
-  // posts에서 실제 사용된 태그들 추출 (중복 제거)
-  const posts = loadPosts();
-  const usedTags = Array.from(
-    new Set(posts.flatMap((post) => post.tags))
-  ).sort();
-
-  // 검색어로 태그 필터링
-  const filteredTags = usedTags.filter((tag) =>
-    tag.toLowerCase().includes(tagSearchQuery.toLowerCase())
-  );
-
-  // 검색어가 변경되면 표시 개수 초기화
-  const handleSearchChange = (query: string) => {
-    setTagSearchQuery(query);
-  };
+  const { selectedTag, usedTags, tagCounts, handleTagClick } = useTagFilter();
 
   // 토글 핸들러
   const handleToggle = () => {
@@ -66,53 +51,13 @@ export function SidebarCategories() {
               className="overflow-hidden"
             >
               <div className="p-3">
-                {/* 검색 Input */}
-                <div className="mb-3 relative max-w-full">
-                  <div className="relative">
-                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-[#e91e63] flex-shrink-0" />
-                    <input
-                      type="text"
-                      value={tagSearchQuery}
-                      onChange={(e) => handleSearchChange(e.target.value)}
-                      placeholder="Search..."
-                      className="w-full max-w-full pl-7 pr-2 py-1.5 border-2 border-[#ec407a] bg-[#fce4ec] text-[#1a0033] text-[10px] focus:outline-none focus:border-[#e91e63]"
-                      style={{ fontFamily: "'DungGeunMo', monospace" }}
-                    />
-                  </div>
-                </div>
-
-                {/* 태그 그리드 - 고정 높이 + 스크롤 */}
-                {filteredTags.length > 0 ? (
-                  <div className="max-h-48 overflow-y-auto overflow-x-hidden pr-1 custom-scrollbar">
-                    <div className="grid grid-cols-2 gap-1.5 max-w-full">
-                      {filteredTags.map((tag, i) => (
-                        <motion.button
-                          key={tag}
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ delay: i * 0.02, type: "spring" }}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="px-2 py-1.5 bg-gradient-to-br from-[#f8bbd0] to-[#fce4ec] border-2 border-[#ec407a] shadow-[2px_2px_0px_0px_rgba(0,0,0,0.2)] text-center min-w-0"
-                        >
-                          <div
-                            className="text-[9px] text-[#e91e63] truncate"
-                            style={{ fontFamily: "'DungGeunMo', monospace" }}
-                          >
-                            {tag}
-                          </div>
-                        </motion.button>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <div
-                    className="text-center py-3 text-[#9c27b0] text-[9px] max-w-full"
-                    style={{ fontFamily: "'DungGeunMo', monospace" }}
-                  >
-                    결과 없음
-                  </div>
-                )}
+                <CategoryTags
+                  tags={usedTags}
+                  tagCounts={tagCounts}
+                  selectedTag={selectedTag}
+                  onTagClick={handleTagClick}
+                  variant="sidebar"
+                />
               </div>
             </motion.div>
           )}
