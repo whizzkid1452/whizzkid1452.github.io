@@ -87,7 +87,7 @@ export function RetroPostCard({
           className="text-[#1a0033] text-xs md:text-sm leading-relaxed mb-4"
           style={{ fontFamily: "'DungGeunMo', monospace" }}
         >
-          {content}
+          {content.length > 200 ? `${content.slice(0, 200)}...` : content}
         </p>
 
         {/* Tags */}
