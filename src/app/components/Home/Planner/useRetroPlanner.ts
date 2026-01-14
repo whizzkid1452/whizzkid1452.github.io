@@ -90,7 +90,18 @@ export function useRetroPlanner() {
 
   const selectedDateStr = formatDate(selectedDate);
   const todayTasks = allTasks.filter((task) => task.date === selectedDateStr);
-  const sortedTasks = todayTasks.sort((a, b) => a.time.localeCompare(b.time));
+  
+  const priorityOrder = { high: 3, medium: 2, low: 1 };
+  const sortedTasks = todayTasks.sort((a, b) => {
+    if (a.completed !== b.completed) {
+      return a.completed ? 1 : -1;
+    }
+    if (a.priority !== b.priority) {
+      return priorityOrder[b.priority] - priorityOrder[a.priority];
+    }
+    return a.time.localeCompare(b.time);
+  });
+  
   const completedCount = todayTasks.filter((task) => task.completed).length;
   const totalCount = todayTasks.length;
   const displayDate = formatDisplayDate(selectedDate);

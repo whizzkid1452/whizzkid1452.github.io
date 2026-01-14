@@ -39,7 +39,16 @@ export function RetroPlannerMonthView({
       </div>
       <div className={calendarStyles.monthGrid}>
         {monthDates.map((day, index) => {
-          const dayTasks = tasks.filter((t) => t.date === day.dateStr).sort((a, b) => a.time.localeCompare(b.time));
+          const priorityOrder = { high: 3, medium: 2, low: 1 };
+          const dayTasks = tasks.filter((t) => t.date === day.dateStr).sort((a, b) => {
+            if (a.completed !== b.completed) {
+              return a.completed ? 1 : -1;
+            }
+            if (a.priority !== b.priority) {
+              return priorityOrder[b.priority] - priorityOrder[a.priority];
+            }
+            return a.time.localeCompare(b.time);
+          });
           return (
             <div 
               key={index} 
@@ -119,7 +128,16 @@ export function RetroPlannerMonthView({
       
       <AnimatePresence>
         {hoveredDate && hoveredDayRef.current[hoveredDate] && (() => {
-          const dayTasks = tasks.filter((t) => t.date === hoveredDate).sort((a, b) => a.time.localeCompare(b.time));
+          const priorityOrder = { high: 3, medium: 2, low: 1 };
+          const dayTasks = tasks.filter((t) => t.date === hoveredDate).sort((a, b) => {
+            if (a.completed !== b.completed) {
+              return a.completed ? 1 : -1;
+            }
+            if (a.priority !== b.priority) {
+              return priorityOrder[b.priority] - priorityOrder[a.priority];
+            }
+            return a.time.localeCompare(b.time);
+          });
           if (dayTasks.length === 0) return null;
           
           const rect = hoveredDayRef.current[hoveredDate]!.getBoundingClientRect();
