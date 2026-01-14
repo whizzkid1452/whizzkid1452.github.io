@@ -9,7 +9,7 @@ import { RetroSidebar } from "./components/RetroSidebar/index";
 
 // 모든 페이지를 lazy loading으로 로드
 const PostPage = lazy(() => import("./components/PostPage/PostPage").then(module => ({ default: module.PostPage })));
-const GamePage = lazy(() => import("./components/GamePage/GamePage").then(module => ({ default: module.GamePage })));
+
 const MusicPage = lazy(() => import("./components/MusicPage/MusicPage").then(module => ({ default: module.MusicPage })));
 const CodePage = lazy(() => import("./components/CodePage/CodePage").then(module => ({ default: module.CodePage })));
 const GuestBookPage = lazy(() => import("./components/GuestBookPage/GuestBookPage").then(module => ({ default: module.GuestBookPage })));
@@ -45,7 +45,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/post" element={<PostPage />} />
-            <Route path="/game" element={<Navigate to="/" replace />} />
+
             <Route path="/music" element={<MusicPage />} />
             <Route path="/code" element={<CodePage />} />
             <Route path="/diary" element={<GuestBookPage />} />
