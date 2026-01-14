@@ -7,16 +7,26 @@ export function useTagFilter() {
   const searchParams = new URLSearchParams(location.search);
   const selectedTags = searchParams.getAll("tag");
 
-  // posts에서 실제 사용된 태그들 추출 및 개수 계산
+  // posts에서 실제 사용된 모든 태그들 추출 (목록 유지를 위해)
   const posts = loadPosts();
-  const tagCounts = posts.reduce((acc, post) => {
+  const allTagsSet = new Set<string>();
+  posts.forEach(post => {
+    post.tags.forEach(tag => allTagsSet.add(tag));
+  });
+  const usedTags = Array.from(allTagsSet).sort();
+
+  // 현재 선택된 태그들에 기반한 필터링 (AND 로직)
+  // RetroPostPage와 동일한 로직을 사용하여 카운트 계산
+  const filteredPosts = selectedTags.length > 0
+    ? posts.filter((post) => selectedTags.every(tag => post.tags.includes(tag)))
+    : posts;
+
+  const tagCounts = filteredPosts.reduce((acc, post) => {
     post.tags.forEach((tag) => {
       acc[tag] = (acc[tag] || 0) + 1;
     });
     return acc;
   }, {} as Record<string, number>);
-
-  const usedTags = Object.keys(tagCounts).sort();
 
   // 태그 클릭 핸들러 (토글 방식)
   const handleTagClick = (tag: string) => {
