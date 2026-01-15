@@ -47,10 +47,9 @@ export function RetroClockSchedule() {
   ]);
 
   const [checklist] = useState([
-    { time: "10:00", task: "Zoom 수업", done: false },
-    { time: "14:00", task: "과제 제출", done: false },
-    { time: "16:00", task: "운동하기", done: true },
-    { time: "", task: "독서", done: true },
+    { time: "", task: "drop.ai 프로젝트", done: false },
+    { time: "", task: "라이브 코딩 주 2개 (주말 테스트)", done: false },
+    { time: "", task: "과제 연습 (패턴 암기 매일 1개)", done: false },
   ]);
 
   // 파이 조각 경로 생성

@@ -48,7 +48,7 @@ export const CenterText = memo(function CenterText() {
       {/* 그림자 레이어 */}
       <text
         x={centerX}
-        y={centerY - 2}
+        y={centerY - 6}
         textAnchor="middle"
         dominantBaseline="middle"
         style={{
@@ -64,7 +64,7 @@ export const CenterText = memo(function CenterText() {
       {/* 메인 텍스트 */}
       <text
         x={centerX}
-        y={centerY - 2}
+        y={centerY - 6}
         textAnchor="middle"
         dominantBaseline="middle"
         style={{
@@ -81,7 +81,7 @@ export const CenterText = memo(function CenterText() {
       {/* 그림자 레이어 */}
       <text
         x={centerX}
-        y={centerY + 4}
+        y={centerY}
         textAnchor="middle"
         dominantBaseline="middle"
         style={{
@@ -91,13 +91,13 @@ export const CenterText = memo(function CenterText() {
         }}
         transform="translate(0.5, 0.5)"
       >
-        + 회사 문제
+        + 라이브코딩 1-2
       </text>
       
       {/* 메인 텍스트 */}
       <text
         x={centerX}
-        y={centerY + 4}
+        y={centerY}
         textAnchor="middle"
         dominantBaseline="middle"
         style={{
@@ -107,7 +107,40 @@ export const CenterText = memo(function CenterText() {
         filter="url(#glow)"
         className="animate-[textPulse_2s_ease-in-out_infinite]"
       >
-        + 회사 문제
+        + 라이브코딩 1-2
+      </text>
+
+      {/* 세 번째 줄 */}
+      {/* 그림자 레이어 */}
+      <text
+        x={centerX}
+        y={centerY + 6}
+        textAnchor="middle"
+        dominantBaseline="middle"
+        style={{
+          ...getCenterTextStyle("4.5px"),
+          fill: "#FF1493",
+          opacity: 0.3,
+        }}
+        transform="translate(0.5, 0.5)"
+      >
+        + 과제연습 3-4
+      </text>
+      
+      {/* 메인 텍스트 */}
+      <text
+        x={centerX}
+        y={centerY + 6}
+        textAnchor="middle"
+        dominantBaseline="middle"
+        style={{
+          ...getCenterTextStyle("4.5px"),
+          fill: "url(#textGradient)",
+        }}
+        filter="url(#glow)"
+        className="animate-[textPulse_2s_ease-in-out_infinite]"
+      >
+        + 과제연습 3-4
       </text>
     </svg>
   );
