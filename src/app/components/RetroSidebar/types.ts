@@ -1,7 +1,8 @@
 import { LucideIcon } from "lucide-react";
+import { IconType } from "react-icons";
 
 export interface MenuItem {
-  icon: LucideIcon;
+  icon: LucideIcon | IconType;
   label: string;
   color: string;
   path: string;

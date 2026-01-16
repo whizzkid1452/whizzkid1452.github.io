@@ -1,11 +1,11 @@
 import { 
   Home, 
   Music, 
-  Code, 
   FileText,
   MessageSquare,
   Info
 } from "lucide-react";
+import { SiGithub } from "react-icons/si";
 import { MenuItem } from "./types";
 
 // 페이지 라벨과 경로 매핑
@@ -14,7 +14,7 @@ export const PAGE_ROUTES: Record<string, string> = {
   post: "/post",
 
   music: "/music",
-  code: "/code",
+  code: "https://github.com/whizzkid1452?tab=repositories",
   diary: "/diary",
   about: "/about",
 };
@@ -26,5 +26,5 @@ export const MENU_ITEMS: MenuItem[] = [
   { icon: MessageSquare, label: "guestbook", color: "#ff9800", path: PAGE_ROUTES.diary },
 
   { icon: Info, label: "about", color: "#607d8b", path: PAGE_ROUTES.about },
-  { icon: Code, label: "code", color: "#4caf50", path: PAGE_ROUTES.code },
+  { icon: SiGithub, label: "code", color: "#4caf50", path: PAGE_ROUTES.code },
 ];

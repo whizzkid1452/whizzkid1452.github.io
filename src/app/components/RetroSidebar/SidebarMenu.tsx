@@ -52,34 +52,72 @@ export function SidebarMenu({ menuItems, onItemClick }: SidebarMenuProps) {
                 </span>
               </div>
             ) : (
-              <Link
-                to={item.path}
-                onClick={onItemClick}
-                className={`w-full p-3 mb-2 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-3 transition-all block ${
+              (() => {
+                const isExternalLink = item.path.startsWith('http://') || item.path.startsWith('https://');
+                const linkClassName = `w-full p-3 mb-2 border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-3 transition-all block ${
                   isActive 
                     ? 'bg-[#e91e63] text-white' 
                     : 'bg-white text-[#1a0033] hover:bg-[#fce4ec]'
-                }`}
-              >
-                <div 
-                  className="w-8 h-8 border-2 border-current flex items-center justify-center"
-                  style={{ backgroundColor: isActive ? 'white' : item.color }}
-                >
-                  <Icon 
-                    className="w-5 h-5" 
-                    style={{ 
-                      color: isActive ? item.color : 'white',
-                      imageRendering: "pixelated" 
-                    }} 
-                  />
-                </div>
-                <span 
-                  className="text-[10px]"
-                  style={{ fontFamily: "'Press Start 2P', monospace" }}
-                >
-                  {item.label}
-                </span>
-              </Link>
+                }`;
+                
+                if (isExternalLink) {
+                  return (
+                    <a
+                      href={item.path}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={onItemClick}
+                      className={linkClassName}
+                    >
+                      <div 
+                        className="w-8 h-8 border-2 border-current flex items-center justify-center"
+                        style={{ backgroundColor: item.color }}
+                      >
+                        <Icon 
+                          className="w-5 h-5" 
+                          style={{ 
+                            color: 'white',
+                            imageRendering: "pixelated" 
+                          }} 
+                        />
+                      </div>
+                      <span 
+                        className="text-[10px]"
+                        style={{ fontFamily: "'Press Start 2P', monospace" }}
+                      >
+                        {item.label}
+                      </span>
+                    </a>
+                  );
+                }
+                
+                return (
+                  <Link
+                    to={item.path}
+                    onClick={onItemClick}
+                    className={linkClassName}
+                  >
+                    <div 
+                      className="w-8 h-8 border-2 border-current flex items-center justify-center"
+                      style={{ backgroundColor: isActive ? 'white' : item.color }}
+                    >
+                      <Icon 
+                        className="w-5 h-5" 
+                        style={{ 
+                          color: isActive ? item.color : 'white',
+                          imageRendering: "pixelated" 
+                        }} 
+                      />
+                    </div>
+                    <span 
+                      className="text-[10px]"
+                      style={{ fontFamily: "'Press Start 2P', monospace" }}
+                    >
+                      {item.label}
+                    </span>
+                  </Link>
+                );
+              })()
             )}
           </motion.div>
         );
