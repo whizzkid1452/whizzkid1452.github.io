@@ -85,6 +85,56 @@ export function useRetroPlanner() {
     setGoogleCalendarTasks(convertedTasks);
   }, [calendarEvents]);
 
+  // 오늘 날짜에 기본 항목 추가
+  useEffect(() => {
+    const today = new Date();
+    const todayStr = formatDate(today);
+    
+    // 오늘 날짜의 기존 태스크 확인
+    const existingTodayTasks = tasks.filter((task) => task.date === todayStr);
+    const existingTitles = new Set(existingTodayTasks.map((task) => task.title));
+    
+    // 기본 항목들
+    const defaultTasks: Task[] = [
+      {
+        id: Date.now() + 1,
+        title: "알고리즘",
+        time: "09:00",
+        category: "공부 Study",
+        priority: "high",
+        completed: false,
+        date: todayStr,
+      },
+      {
+        id: Date.now() + 2,
+        title: "drop.ai + @",
+        time: "14:00",
+        category: "업무 Work",
+        priority: "medium",
+        completed: false,
+        date: todayStr,
+      },
+      {
+        id: Date.now() + 3,
+        title: "react 인강",
+        time: "16:00",
+        category: "공부 Study",
+        priority: "medium",
+        completed: false,
+        date: todayStr,
+      },
+    ];
+    
+    // 기본 항목 중 아직 없는 것만 추가
+    const tasksToAdd = defaultTasks.filter(
+      (task) => !existingTitles.has(task.title)
+    );
+    
+    if (tasksToAdd.length > 0) {
+      setTasks((prevTasks) => [...prevTasks, ...tasksToAdd]);
+    }
+  }, []); // 컴포넌트 마운트 시 한 번만 실행
+
   const allTasks = useMemo(() => {
     if (!isAuthenticated) {
       return tasks;
