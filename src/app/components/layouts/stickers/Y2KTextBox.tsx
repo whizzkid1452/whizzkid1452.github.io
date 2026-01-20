@@ -8,11 +8,11 @@ interface Y2KTextBoxProps {
   className?: string;
 }
 
-export function Y2KTextBox({ 
-  children, 
-  variant = "pink", 
+export function Y2KTextBox({
+  children,
+  variant = "pink",
   rotation = 0,
-  className = "" 
+  className = ""
 }: Y2KTextBoxProps) {
   const variantStyles = {
     pink: "bg-gradient-to-br from-pink-200 to-pink-300 border-pink-400",

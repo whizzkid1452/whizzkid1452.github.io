@@ -12,6 +12,7 @@ import { PixelCDPlayer } from "./components/MusicPage/PixelCDPlayer";
 const PostPage = lazy(() => import("./components/PostPage/PostPage").then(module => ({ default: module.PostPage })));
 
 const MusicPage = lazy(() => import("./components/MusicPage/MusicPage").then(module => ({ default: module.MusicPage })));
+const WorkFlowPage = lazy(() => import("./components/WorkFlowPage/WorkFlowPage").then(module => ({ default: module.WorkFlowPage })));
 const CodePage = lazy(() => import("./components/CodePage/CodePage").then(module => ({ default: module.CodePage })));
 const GuestBookPage = lazy(() => import("./components/GuestBookPage/GuestBookPage").then(module => ({ default: module.GuestBookPage })));
 
@@ -52,6 +53,7 @@ export default function App() {
             <Route path="/post" element={<PostPage />} />
 
             <Route path="/music" element={<MusicPage />} />
+            <Route path="/workflow" element={<WorkFlowPage />} />
             <Route path="/code" element={<CodePage />} />
             <Route path="/diary" element={<GuestBookPage />} />
             <Route path="/about" element={<About />} />
