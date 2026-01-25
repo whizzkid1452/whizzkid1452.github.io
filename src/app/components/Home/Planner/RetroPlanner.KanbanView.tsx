@@ -26,6 +26,8 @@ function CardForm({
     status: TaskStatus;
     priority: "high" | "medium" | "low";
     category: string;
+    startDate?: string;
+    endDate?: string;
   }) => void;
   onCancel: () => void;
 }) {
@@ -33,6 +35,8 @@ function CardForm({
   const [description, setDescription] = useState(initialData?.description || "");
   const [priority, setPriority] = useState<"high" | "medium" | "low">(initialData?.priority || "medium");
   const [category, setCategory] = useState(initialData?.category || "All");
+  const [startDate, setStartDate] = useState(initialData?.startDate || "");
+  const [endDate, setEndDate] = useState(initialData?.endDate || "");
 
   const categories = [
     "All",
@@ -53,6 +57,8 @@ function CardForm({
       status: initialData?.status || targetStatus,
       priority,
       category,
+      startDate: startDate || undefined,
+      endDate: endDate || undefined,
     });
   };
 
@@ -102,6 +108,32 @@ function CardForm({
           ))}
         </select>
       </div>
+
+      {/* 기간 설정 */}
+      <div className="flex gap-2 mb-2">
+        <div className="flex-1">
+          <label className="block text-[10px] text-gray-500 mb-1">시작일</label>
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="w-full px-2 py-1 border-2 border-gray-300 text-xs focus:border-[#FF1493] outline-none"
+          />
+        </div>
+        <div className="flex-1">
+          <label className="block text-[10px] text-gray-500 mb-1">종료일</label>
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            min={startDate || undefined}
+            className="w-full px-2 py-1 border-2 border-gray-300 text-xs focus:border-[#FF1493] outline-none"
+          />
+        </div>
+      </div>
+      {startDate && endDate && new Date(startDate) > new Date(endDate) && (
+        <p className="text-[10px] text-red-500 mb-2">종료일은 시작일보다 이후여야 합니다</p>
+      )}
 
       <div className="flex gap-2">
         <button
@@ -320,7 +352,7 @@ function KanbanColumn({
     <div 
       ref={columnRef}
       className={`
-        flex-1 min-w-[280px]
+        flex-shrink-0 w-[280px] md:w-[300px]
         bg-white border-4 border-black
         shadow-[8px_8px_0px_0px_rgba(0,0,0,0.3)]
         flex flex-col
@@ -547,7 +579,7 @@ export function RetroPlannerKanbanView() {
 
       {/* Kanban Columns */}
       <div 
-        className="flex gap-4 pb-4 w-full overflow-x-auto"
+        className="flex gap-4 pb-4 w-full overflow-x-auto min-w-0"
         style={{
           WebkitOverflowScrolling: "touch",
         }}

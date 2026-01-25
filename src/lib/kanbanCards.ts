@@ -13,6 +13,8 @@ export interface KanbanCardDB {
   order_index: number
   created_at: string
   updated_at: string
+  start_date: string | null
+  end_date: string | null
 }
 
 export interface KanbanCardInput {
@@ -22,6 +24,8 @@ export interface KanbanCardInput {
   priority: Priority
   category: string
   order_index?: number
+  start_date?: string
+  end_date?: string
 }
 
 const TABLE = 'kanban_cards'
@@ -67,6 +71,8 @@ export async function createKanbanCard(card: KanbanCardInput): Promise<KanbanCar
       priority: card.priority,
       category: card.category,
       order_index: card.order_index ?? newOrderIndex,
+      start_date: card.start_date || null,
+      end_date: card.end_date || null,
     }])
     .select()
     .single()

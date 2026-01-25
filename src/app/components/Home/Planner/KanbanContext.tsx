@@ -16,6 +16,8 @@ interface KanbanContextType {
     status: TaskStatus;
     priority: "high" | "medium" | "low";
     category: string;
+    startDate?: string;
+    endDate?: string;
   }) => void;
   updateCard: (cardId: number, updates: Partial<KanbanCard>) => void;
   deleteCard: (cardId: number) => void;

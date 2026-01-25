@@ -11,6 +11,8 @@ export interface KanbanCard {
   order: number;
   createdAt: string;
   updatedAt: string;
+  startDate?: string; // 시작 날짜 (YYYY-MM-DD)
+  endDate?: string; // 종료 날짜 (YYYY-MM-DD)
 }
 
 export interface Task {

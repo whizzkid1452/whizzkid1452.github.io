@@ -53,24 +53,40 @@ function getDatePosition(date: Date, startDate: Date, endDate: Date, totalWidth:
 
 /**
  * 카드의 시작 위치와 너비 계산 (px)
- * 칸반 카드는 생성일을 기준으로 표시
+ * startDate~endDate 기간이 있으면 해당 기간으로, 없으면 생성일 기준 하루로 표시
  */
 function getCardBarPosition(
   card: KanbanCard,
-  startDate: Date,
-  endDate: Date,
-  totalWidth: number
+  viewStartDate: Date,
+  viewEndDate: Date,
+  totalWidth: number,
+  dayColumnWidth: number
 ): { left: number; width: number } {
-  const cardDate = new Date(card.createdAt);
-  cardDate.setHours(0, 0, 0, 0);
+  // 카드에 기간이 설정되어 있으면 사용, 없으면 생성일 기준
+  const cardStartDate = card.startDate 
+    ? new Date(card.startDate) 
+    : new Date(card.createdAt);
+  cardStartDate.setHours(0, 0, 0, 0);
   
-  // 범위를 벗어나면 조정
-  if (cardDate < startDate || cardDate > endDate) {
-    return { left: 0, width: 40 };
+  const cardEndDate = card.endDate 
+    ? new Date(card.endDate) 
+    : new Date(cardStartDate);
+  cardEndDate.setHours(0, 0, 0, 0);
+  
+  // 뷰 범위와 카드 기간의 교집합 계산
+  const visibleStart = cardStartDate < viewStartDate ? viewStartDate : cardStartDate;
+  const visibleEnd = cardEndDate > viewEndDate ? viewEndDate : cardEndDate;
+  
+  // 범위를 벗어나면 표시 안함
+  if (visibleStart > viewEndDate || visibleEnd < viewStartDate) {
+    return { left: 0, width: 0 };
   }
   
-  const left = getDatePosition(cardDate, startDate, endDate, totalWidth);
-  const width = 40; // 칸반 카드는 하루 기준으로 표시
+  const left = getDatePosition(visibleStart, viewStartDate, viewEndDate, totalWidth);
+  
+  // 기간의 일수 계산 (최소 1일)
+  const durationDays = Math.max(1, Math.ceil((visibleEnd.getTime() - visibleStart.getTime()) / (1000 * 60 * 60 * 24)) + 1);
+  const width = durationDays * dayColumnWidth;
   
   return { left, width };
 }
@@ -85,18 +101,32 @@ export function RetroPlannerTimelineView({
   const dayColumnWidth = dates.length > 14 ? 40 : 80;
   const totalWidth = dates.length * dayColumnWidth;
   
-  // 칸반 카드를 타임라인에 표시 (생성일 기준으로 필터링)
+  // 칸반 카드를 타임라인에 표시 (기간 또는 생성일 기준으로 필터링)
   const visibleCards = useMemo(() => {
     return cards
       .filter((card) => {
-        const cardDate = new Date(card.createdAt);
-        cardDate.setHours(0, 0, 0, 0);
-        return cardDate >= startDate && cardDate <= endDate;
+        // 카드에 기간이 설정되어 있으면 기간으로, 없으면 생성일로 필터링
+        const cardStart = card.startDate 
+          ? new Date(card.startDate) 
+          : new Date(card.createdAt);
+        cardStart.setHours(0, 0, 0, 0);
+        
+        const cardEnd = card.endDate 
+          ? new Date(card.endDate) 
+          : new Date(cardStart);
+        cardEnd.setHours(0, 0, 0, 0);
+        
+        // 카드 기간과 뷰 기간이 겹치는지 확인
+        return cardStart <= endDate && cardEnd >= startDate;
       })
       .sort((a, b) => {
         // status 순서: in_progress > todo > done
         const statusOrder: Record<TaskStatus, number> = { in_progress: 0, todo: 1, done: 2 };
         if (a.status !== b.status) return statusOrder[a.status] - statusOrder[b.status];
+        // 시작일 순서
+        const aStart = a.startDate ? new Date(a.startDate) : new Date(a.createdAt);
+        const bStart = b.startDate ? new Date(b.startDate) : new Date(b.createdAt);
+        if (aStart.getTime() !== bStart.getTime()) return aStart.getTime() - bStart.getTime();
         // 우선순위 순서
         const priorityOrder: Record<KanbanCard["priority"], number> = { high: 0, medium: 1, low: 2 };
         const byPriority = priorityOrder[a.priority] - priorityOrder[b.priority];
@@ -132,7 +162,7 @@ export function RetroPlannerTimelineView({
   }
 
   return (
-    <div className="w-full relative">
+    <div className="w-full min-w-0 relative overflow-hidden">
       {/* Floating decorations (레퍼런스 스타일) */}
       {[...Array(5)].map((_, i) => (
         <motion.div
@@ -164,7 +194,7 @@ export function RetroPlannerTimelineView({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-[#f8bbd0] border-4 border-[#FF1493] p-4 relative w-full"
+        className="bg-[#f8bbd0] border-4 border-[#FF1493] p-4 relative w-full min-w-0"
         style={{
           imageRendering: "pixelated",
           boxShadow: "8px 8px 0px 0px rgba(255,20,147,0.3)",
@@ -317,12 +347,13 @@ export function RetroPlannerTimelineView({
                   const statusStyle = timelineStatusStyles[status];
                   const priorityStyle = priorityColors[card.priority];
 
-                  const { left, width } = getCardBarPosition(card, startDate, endDate, totalWidth);
+                  const { left, width } = getCardBarPosition(card, startDate, endDate, totalWidth, dayColumnWidth);
+                  
+                  // 너비가 0이면 표시하지 않음
+                  if (width === 0) return null;
+                  
                   const leftByColumns = Math.round(left / dayColumnWidth) * dayColumnWidth;
-                  const widthByColumns = Math.max(
-                    dayColumnWidth,
-                    Math.round(width / dayColumnWidth) * dayColumnWidth
-                  );
+                  const widthByColumns = Math.max(dayColumnWidth, width);
 
                   return (
                     <motion.div
@@ -368,12 +399,15 @@ export function RetroPlannerTimelineView({
                             >
                               {card.category.split(" ")[0]}
                             </span>
-                            <span
-                              className="text-[8px] text-gray-400"
-                              style={getFontStyle("'Press Start 2P'")}
-                            >
-                              {new Date(card.createdAt).toLocaleDateString("ko-KR", { month: "short", day: "numeric" })}
-                            </span>
+<span
+                            className="text-[8px] text-gray-400"
+                            style={getFontStyle("'Press Start 2P'")}
+                          >
+                            {card.startDate && card.endDate
+                              ? `${new Date(card.startDate).toLocaleDateString("ko-KR", { month: "numeric", day: "numeric" })}~${new Date(card.endDate).toLocaleDateString("ko-KR", { month: "numeric", day: "numeric" })}`
+                              : new Date(card.createdAt).toLocaleDateString("ko-KR", { month: "short", day: "numeric" })
+                            }
+                          </span>
                           </div>
                         </div>
                       </div>
@@ -502,7 +536,10 @@ export function RetroPlannerTimelineView({
                               <div className="flex items-center gap-2 text-[8px] md:text-[9px]">
                                 <span style={getFontStyle("'Press Start 2P'")}>{card.priority.toUpperCase()}</span>
                                 <span style={getFontStyle("'DungGeunMo'")}>
-                                  {new Date(card.createdAt).toLocaleDateString("ko-KR")}
+                                  {card.startDate && card.endDate
+                                    ? `${new Date(card.startDate).toLocaleDateString("ko-KR")} ~ ${new Date(card.endDate).toLocaleDateString("ko-KR")}`
+                                    : new Date(card.createdAt).toLocaleDateString("ko-KR")
+                                  }
                                 </span>
                               </div>
                             </div>

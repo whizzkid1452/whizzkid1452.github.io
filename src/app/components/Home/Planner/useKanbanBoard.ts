@@ -21,6 +21,8 @@ function dbToKanbanCard(dbCard: KanbanCardDB): KanbanCard {
     order: dbCard.order_index,
     createdAt: dbCard.created_at,
     updatedAt: dbCard.updated_at,
+    startDate: dbCard.start_date || undefined,
+    endDate: dbCard.end_date || undefined,
   };
 }
 
@@ -63,6 +65,8 @@ export function useKanbanBoard() {
     status: TaskStatus;
     priority: "high" | "medium" | "low";
     category: string;
+    startDate?: string;
+    endDate?: string;
   }) => {
     try {
       const newCard = await createKanbanCard({
@@ -71,6 +75,8 @@ export function useKanbanBoard() {
         status: cardData.status,
         priority: cardData.priority,
         category: cardData.category,
+        start_date: cardData.startDate,
+        end_date: cardData.endDate,
       });
       
       setCards((prev) => [...prev, dbToKanbanCard(newCard)]);
@@ -91,6 +97,8 @@ export function useKanbanBoard() {
       if (updates.priority !== undefined) dbUpdates.priority = updates.priority;
       if (updates.category !== undefined) dbUpdates.category = updates.category;
       if (updates.order !== undefined) dbUpdates.order_index = updates.order;
+      if (updates.startDate !== undefined) dbUpdates.start_date = updates.startDate || null;
+      if (updates.endDate !== undefined) dbUpdates.end_date = updates.endDate || null;
 
       const updatedCard = await updateKanbanCard(cardId, dbUpdates as any);
       

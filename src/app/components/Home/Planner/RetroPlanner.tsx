@@ -69,7 +69,7 @@ export function RetroPlanner() {
   return (
     <KanbanProvider>
       <div 
-        className={`${containerStyles.wrapper} ${isHorizontalScrollView ? "!max-w-none !w-[calc(100vw-2rem)] md:!w-[calc(100vw-4rem)] overflow-x-auto" : ""}`}
+        className={`${containerStyles.wrapper} ${isHorizontalScrollView ? "!max-w-none w-full overflow-hidden" : ""}`}
       >
         <RetroPlannerFloatingDecorations />
 
@@ -112,8 +112,8 @@ export function RetroPlanner() {
                   onPlannerModeChange={setPlannerMode}
                 />
 
-                <div className={`${containerStyles.canvas} ${isHorizontalScrollView ? "min-w-0 w-full" : ""}`}>
-                  <div className={`${containerStyles.canvasArea} ${isHorizontalScrollView ? "overflow-x-auto" : ""}`} style={{ borderColor: "#808080" }}>
+                <div className={`${containerStyles.canvas} ${isHorizontalScrollView ? "min-w-0 w-full overflow-hidden" : ""}`}>
+                  <div className={`${containerStyles.canvasArea} ${isHorizontalScrollView ? "overflow-x-auto overflow-y-visible" : ""}`} style={{ borderColor: "#808080" }}>
                     <div 
                       className="w-full h-full relative"
                       style={getCanvasGradient()}
