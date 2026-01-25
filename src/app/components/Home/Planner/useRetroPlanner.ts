@@ -471,8 +471,6 @@ export function useRetroPlanner() {
     handleToday,
     handleSaveTask,
     handleToggleTask,
-    handleStatusChange,
-    handleReorder,
     handleDeleteTask,
     handleTimeUpdate,
     handlePrevPage,

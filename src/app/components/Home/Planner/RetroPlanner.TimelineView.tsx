@@ -3,35 +3,28 @@ import { Clock, Star } from "lucide-react";
 import { useMemo, useRef } from "react";
 import { categoryColors } from "./RetroPlanner.constants";
 import { getFontStyle } from "./RetroPlanner.styles";
-import type { Task } from "./RetroPlanner.types";
+import type { KanbanCard, TaskStatus } from "./RetroPlanner.types";
 import { formatDate } from "./RetroPlanner.utils";
+import { useKanbanContext } from "./KanbanContext";
 
 type TimelineStatusStyle = { bg: string; border: string; light: string };
 
-const timelineStatusStyles: Record<"todo" | "inprogress" | "done", TimelineStatusStyle> =
-  {
-    todo: { bg: "#FF8C42", border: "#FF6B35", light: "#FFE0B2" },
-    inprogress: { bg: "#D946EF", border: "#C026D3", light: "#F5D0FE" },
-    done: { bg: "#06B6D4", border: "#0891B2", light: "#A5F3FC" },
-  };
+// 칸반보드와 동일한 status 키 사용 (todo, in_progress, done)
+const timelineStatusStyles: Record<TaskStatus, TimelineStatusStyle> = {
+  todo: { bg: "#FF8C42", border: "#FF6B35", light: "#FFE0B2" },
+  in_progress: { bg: "#D946EF", border: "#C026D3", light: "#F5D0FE" },
+  done: { bg: "#06B6D4", border: "#0891B2", light: "#A5F3FC" },
+};
 
-const priorityColors: Record<Task["priority"], { bg: string; border: string }> = {
+const priorityColors: Record<KanbanCard["priority"], { bg: string; border: string }> = {
   high: { bg: "#FF1493", border: "#C2185B" },
   medium: { bg: "#FF69B4", border: "#FF1493" },
   low: { bg: "#FFB6C1", border: "#FF69B4" },
 };
 
-function getTaskTimelineStatus(task: Task): keyof typeof timelineStatusStyles {
-  if (task.completed) return "done";
-  if (task.priority === "high") return "inprogress";
-  return "todo";
-}
-
 interface RetroPlannerTimelineViewProps {
-  tasks: Task[];
   startDate: Date;
   endDate: Date;
-  onTaskUpdate?: (taskId: number, startDate: string, endDate: string) => void;
 }
 
 /**
@@ -59,59 +52,58 @@ function getDatePosition(date: Date, startDate: Date, endDate: Date, totalWidth:
 }
 
 /**
- * 태스크의 시작 위치와 너비 계산 (px)
+ * 카드의 시작 위치와 너비 계산 (px)
+ * 칸반 카드는 생성일을 기준으로 표시
  */
-function getTaskBarPosition(
-  task: Task,
+function getCardBarPosition(
+  card: KanbanCard,
   startDate: Date,
   endDate: Date,
   totalWidth: number
 ): { left: number; width: number } {
-  const taskStartDate = task.startDate ? new Date(task.startDate) : new Date(task.date);
-  const taskEndDate = task.endDate ? new Date(task.endDate) : new Date(task.date);
-  
-  // 날짜를 자정으로 정규화
-  taskStartDate.setHours(0, 0, 0, 0);
-  taskEndDate.setHours(23, 59, 59, 999);
+  const cardDate = new Date(card.createdAt);
+  cardDate.setHours(0, 0, 0, 0);
   
   // 범위를 벗어나면 조정
-  const actualStartDate = taskStartDate < startDate ? new Date(startDate) : new Date(taskStartDate);
-  const actualEndDate = taskEndDate > endDate ? new Date(endDate) : new Date(taskEndDate);
+  if (cardDate < startDate || cardDate > endDate) {
+    return { left: 0, width: 40 };
+  }
   
-  const left = getDatePosition(actualStartDate, startDate, endDate, totalWidth);
-  const right = getDatePosition(actualEndDate, startDate, endDate, totalWidth);
-  const width = Math.max(right - left, 40); // 최소 너비 40px
+  const left = getDatePosition(cardDate, startDate, endDate, totalWidth);
+  const width = 40; // 칸반 카드는 하루 기준으로 표시
   
   return { left, width };
 }
 
 export function RetroPlannerTimelineView({
-  tasks,
   startDate,
   endDate,
-  onTaskUpdate,
 }: RetroPlannerTimelineViewProps) {
+  const { cards } = useKanbanContext();
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const dates = useMemo(() => getDatesInRange(startDate, endDate), [startDate, endDate]);
   const dayColumnWidth = dates.length > 14 ? 40 : 80;
   const totalWidth = dates.length * dayColumnWidth;
   
-  const visibleTasks = useMemo(() => {
-    return tasks
-      .filter((task) => {
-        const taskStart = task.startDate ? new Date(task.startDate) : new Date(task.date);
-        const taskEnd = task.endDate ? new Date(task.endDate) : new Date(task.date);
-        return taskStart <= endDate && taskEnd >= startDate;
+  // 칸반 카드를 타임라인에 표시 (생성일 기준으로 필터링)
+  const visibleCards = useMemo(() => {
+    return cards
+      .filter((card) => {
+        const cardDate = new Date(card.createdAt);
+        cardDate.setHours(0, 0, 0, 0);
+        return cardDate >= startDate && cardDate <= endDate;
       })
       .sort((a, b) => {
-        // 완료되지 않은 것 우선, 그 다음 priority, 그 다음 id
-        if (a.completed !== b.completed) return a.completed ? 1 : -1;
-        const priorityOrder: Record<Task["priority"], number> = { high: 0, medium: 1, low: 2 };
+        // status 순서: in_progress > todo > done
+        const statusOrder: Record<TaskStatus, number> = { in_progress: 0, todo: 1, done: 2 };
+        if (a.status !== b.status) return statusOrder[a.status] - statusOrder[b.status];
+        // 우선순위 순서
+        const priorityOrder: Record<KanbanCard["priority"], number> = { high: 0, medium: 1, low: 2 };
         const byPriority = priorityOrder[a.priority] - priorityOrder[b.priority];
         if (byPriority !== 0) return byPriority;
         return a.id - b.id;
       });
-  }, [tasks, startDate, endDate]);
+  }, [cards, startDate, endDate]);
 
   const handleScrollToToday = () => {
     const today = new Date();
@@ -280,9 +272,9 @@ export function RetroPlannerTimelineView({
               </div>
             </div>
 
-            {/* Task Rows */}
+            {/* Card Rows - 칸반 카드 표시 */}
             <div className="relative">
-              {visibleTasks.length === 0 ? (
+              {visibleCards.length === 0 ? (
                 <div className="p-8 text-center">
                   <p
                     className="text-sm md:text-base"
@@ -291,16 +283,25 @@ export function RetroPlannerTimelineView({
                       color: "#C2185B",
                     }}
                   >
-                    이 기간에 표시할 태스크가 없습니다
+                    이 기간에 표시할 칸반 카드가 없습니다
+                  </p>
+                  <p
+                    className="text-xs mt-2"
+                    style={{
+                      ...getFontStyle("'DungGeunMo'"),
+                      color: "#999",
+                    }}
+                  >
+                    칸반보드에서 카드를 추가해보세요
                   </p>
                 </div>
               ) : (
-                visibleTasks.map((task, taskIndex) => {
-                  const status = getTaskTimelineStatus(task);
+                visibleCards.map((card, cardIndex) => {
+                  const status = card.status;
                   const statusStyle = timelineStatusStyles[status];
-                  const priorityStyle = priorityColors[task.priority];
+                  const priorityStyle = priorityColors[card.priority];
 
-                  const { left, width } = getTaskBarPosition(task, startDate, endDate, totalWidth);
+                  const { left, width } = getCardBarPosition(card, startDate, endDate, totalWidth);
                   const leftByColumns = Math.round(left / dayColumnWidth) * dayColumnWidth;
                   const widthByColumns = Math.max(
                     dayColumnWidth,
@@ -309,14 +310,14 @@ export function RetroPlannerTimelineView({
 
                   return (
                     <motion.div
-                      key={task.id}
+                      key={card.id}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: taskIndex * 0.05 }}
+                      transition={{ delay: cardIndex * 0.05 }}
                       className="flex border-b border-[#FFB6C1] hover:bg-[#FFF0F5] transition-colors relative"
                       style={{ minHeight: "60px" }}
                     >
-                      {/* Task Name Column */}
+                      {/* Card Name Column */}
                       <div
                         className="w-56 flex-shrink-0 border-r-3 border-[#FFB6C1] p-2 sticky left-0 bg-white z-10 flex items-center"
                         style={{ imageRendering: "pixelated" }}
@@ -332,30 +333,30 @@ export function RetroPlannerTimelineView({
                             />
                             <p
                               className={`text-[10px] md:text-xs truncate flex-1 ${
-                                task.completed ? "line-through opacity-70" : ""
+                                card.status === "done" ? "line-through opacity-70" : ""
                               }`}
                               style={{
                                 ...getFontStyle("'DungGeunMo'"),
                                 color: "#333",
                               }}
-                              title={task.title}
+                              title={card.title}
                             >
-                              {task.title}
+                              {card.title}
                             </p>
                           </div>
                           <div className="flex items-center justify-between gap-2">
                             <span
                               className="text-[9px] text-gray-500 truncate"
                               style={getFontStyle("'DungGeunMo'")}
-                              title={task.category}
+                              title={card.category}
                             >
-                              {task.category}
+                              {card.category.split(" ")[0]}
                             </span>
                             <span
                               className="text-[8px] text-gray-400"
                               style={getFontStyle("'Press Start 2P'")}
                             >
-                              {task.time}
+                              {new Date(card.createdAt).toLocaleDateString("ko-KR", { month: "short", day: "numeric" })}
                             </span>
                           </div>
                         </div>
@@ -382,11 +383,11 @@ export function RetroPlannerTimelineView({
                           })}
                         </div>
 
-                        {/* Task Bar */}
+                        {/* Card Bar */}
                         <motion.div
                           initial={{ scaleX: 0, originX: 0 }}
                           animate={{ scaleX: 1 }}
-                          transition={{ duration: 0.5, delay: taskIndex * 0.08 }}
+                          transition={{ duration: 0.5, delay: cardIndex * 0.08 }}
                           className="absolute top-1/2 -translate-y-1/2 h-8 border-2 overflow-hidden group"
                           style={{
                             left: `${leftByColumns}px`,
@@ -397,15 +398,15 @@ export function RetroPlannerTimelineView({
                             borderLeftColor: statusStyle.bg,
                             imageRendering: "pixelated",
                             cursor: "pointer",
-                            opacity: task.completed ? 0.85 : 1,
+                            opacity: card.status === "done" ? 0.85 : 1,
                           }}
                         >
                           {/* Progress fill for in-progress */}
-                          {status === "inprogress" && (
+                          {status === "in_progress" && (
                             <motion.div
                               initial={{ width: 0 }}
                               animate={{ width: "50%" }}
-                              transition={{ duration: 1, delay: taskIndex * 0.08 + 0.2 }}
+                              transition={{ duration: 1, delay: cardIndex * 0.08 + 0.2 }}
                               className="absolute inset-0 opacity-40"
                               style={{
                                 backgroundColor: statusStyle.bg,
@@ -431,7 +432,7 @@ export function RetroPlannerTimelineView({
                             />
                           )}
 
-                          {/* Task info */}
+                          {/* Card info */}
                           <div className="relative z-10 h-full flex items-center px-2 gap-2">
                             <div
                               className="px-1.5 py-0.5 text-[7px] md:text-[8px] border whitespace-nowrap"
@@ -442,7 +443,7 @@ export function RetroPlannerTimelineView({
                                 ...getFontStyle("'Press Start 2P'"),
                               }}
                             >
-                              {status === "todo" ? "할일" : status === "inprogress" ? "진행중" : "완료"}
+                              {status === "todo" ? "할일" : status === "in_progress" ? "진행중" : "완료"}
                             </div>
 
                             {dayColumnWidth === 80 && (
@@ -454,7 +455,7 @@ export function RetroPlannerTimelineView({
                                   color: "#666",
                                 }}
                               >
-                                {task.category.split(" ")[0]}
+                                {card.category.split(" ")[0]}
                               </div>
                             )}
                           </div>
@@ -472,14 +473,20 @@ export function RetroPlannerTimelineView({
                                   color: "#C2185B",
                                 }}
                               >
-                                {task.title}
+                                {card.title}
                               </p>
+                              {card.description && (
+                                <p
+                                  className="text-[10px] text-gray-600 mb-2"
+                                  style={getFontStyle("'DungGeunMo'")}
+                                >
+                                  {card.description}
+                                </p>
+                              )}
                               <div className="flex items-center gap-2 text-[8px] md:text-[9px]">
-                                <span style={getFontStyle("'Press Start 2P'")}>{task.priority.toUpperCase()}</span>
+                                <span style={getFontStyle("'Press Start 2P'")}>{card.priority.toUpperCase()}</span>
                                 <span style={getFontStyle("'DungGeunMo'")}>
-                                  {task.startDate && task.endDate
-                                    ? `${task.startDate} ~ ${task.endDate}`
-                                    : task.date}
+                                  {new Date(card.createdAt).toLocaleDateString("ko-KR")}
                                 </span>
                               </div>
                             </div>
@@ -514,10 +521,10 @@ export function RetroPlannerTimelineView({
             <div
               className="w-6 h-3 border-2"
               style={{
-                backgroundColor: timelineStatusStyles.inprogress.light,
-                borderColor: timelineStatusStyles.inprogress.border,
+                backgroundColor: timelineStatusStyles.in_progress.light,
+                borderColor: timelineStatusStyles.in_progress.border,
                 borderLeftWidth: "4px",
-                borderLeftColor: timelineStatusStyles.inprogress.bg,
+                borderLeftColor: timelineStatusStyles.in_progress.bg,
               }}
             />
             <span className="text-[8px] md:text-[9px]" style={getFontStyle("'DungGeunMo'")}>

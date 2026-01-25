@@ -1,57 +1,147 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import type { Task, TaskStatus } from "./RetroPlanner.types";
+import { Plus, Edit2, Trash2 } from "lucide-react";
+import type { KanbanCard, TaskStatus } from "./RetroPlanner.types";
 import { kanbanColumns, categoryColors } from "./RetroPlanner.constants";
 import { getFontStyle } from "./RetroPlanner.styles";
-
-interface RetroPlannerKanbanViewProps {
-  tasks: Task[];
-  onStatusChange: (taskId: number, newStatus: TaskStatus) => void;
-  onReorder: (taskId: number, newStatus: TaskStatus, targetIndex: number) => void;
-  onToggleTask: (taskId: number) => void;
-  onDeleteTask: (taskId: number) => void;
-}
+import { useKanbanContext } from "./KanbanContext";
 
 interface DragInfo {
-  taskId: number;
+  cardId: number;
   sourceStatus: TaskStatus;
 }
 
-interface KanbanColumnProps {
-  columnId: TaskStatus;
-  label: string;
-  color: string;
-  tasks: Task[];
-  dragInfo: DragInfo | null;
-  dropTargetIndex: number | null;
-  onDragStart: (taskId: number, status: TaskStatus) => void;
-  onDragEnd: () => void;
-  onDrop: (taskId: number, newStatus: TaskStatus, targetIndex: number) => void;
-  onDragOverCard: (index: number) => void;
-  onDragLeaveColumn: () => void;
-  onDeleteTask: (taskId: number) => void;
+// 카드 추가/수정 폼
+function CardForm({
+  initialData,
+  targetStatus,
+  onSave,
+  onCancel,
+}: {
+  initialData?: KanbanCard;
+  targetStatus: TaskStatus;
+  onSave: (data: {
+    title: string;
+    description?: string;
+    status: TaskStatus;
+    priority: "high" | "medium" | "low";
+    category: string;
+  }) => void;
+  onCancel: () => void;
+}) {
+  const [title, setTitle] = useState(initialData?.title || "");
+  const [description, setDescription] = useState(initialData?.description || "");
+  const [priority, setPriority] = useState<"high" | "medium" | "low">(initialData?.priority || "medium");
+  const [category, setCategory] = useState(initialData?.category || "업무 Work");
+
+  const categories = [
+    "업무 Work",
+    "공부 Study",
+    "개인 Personal",
+    "운동 Exercise",
+    "기타 Other",
+  ];
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim()) return;
+    
+    onSave({
+      title: title.trim(),
+      description: description.trim() || undefined,
+      status: initialData?.status || targetStatus,
+      priority,
+      category,
+    });
+  };
+
+  return (
+    <motion.form
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      onSubmit={handleSubmit}
+      className="bg-white border-3 border-[#FF1493] p-3 shadow-[4px_4px_0px_0px_rgba(255,20,147,0.3)]"
+      style={{ fontFamily: "'DungGeunMo', monospace" }}
+    >
+      <input
+        type="text"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder="카드 제목..."
+        className="w-full px-2 py-1 border-2 border-gray-300 text-sm mb-2 focus:border-[#FF1493] outline-none"
+        autoFocus
+      />
+      
+      <textarea
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        placeholder="설명 (선택사항)..."
+        className="w-full px-2 py-1 border-2 border-gray-300 text-xs mb-2 resize-none h-16 focus:border-[#FF1493] outline-none"
+      />
+
+      <div className="flex gap-2 mb-2">
+        <select
+          value={priority}
+          onChange={(e) => setPriority(e.target.value as "high" | "medium" | "low")}
+          className="flex-1 px-2 py-1 border-2 border-gray-300 text-xs focus:border-[#FF1493] outline-none"
+        >
+          <option value="high">🔴 높음</option>
+          <option value="medium">🟡 보통</option>
+          <option value="low">🔵 낮음</option>
+        </select>
+
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          className="flex-1 px-2 py-1 border-2 border-gray-300 text-xs focus:border-[#FF1493] outline-none"
+        >
+          {categories.map((cat) => (
+            <option key={cat} value={cat}>{cat.split(" ")[0]}</option>
+          ))}
+        </select>
+      </div>
+
+      <div className="flex gap-2">
+        <button
+          type="submit"
+          className="flex-1 px-3 py-1 bg-[#FF1493] text-white text-xs border-2 border-[#C2185B] hover:bg-[#C2185B]"
+        >
+          {initialData ? "수정" : "추가"}
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="px-3 py-1 bg-gray-200 text-gray-700 text-xs border-2 border-gray-400 hover:bg-gray-300"
+        >
+          취소
+        </button>
+      </div>
+    </motion.form>
+  );
 }
 
-function KanbanCard({ 
-  task,
-  index,
+// 칸반 카드 컴포넌트
+function KanbanCardItem({
+  card,
   isBeingDragged,
   showDropIndicatorAbove,
   showDropIndicatorBelow,
   onDragStart,
   onDragEnd,
   onDragOver,
+  onEdit,
   onDelete,
-}: { 
-  task: Task;
-  index: number;
+}: {
+  card: KanbanCard;
   isBeingDragged: boolean;
   showDropIndicatorAbove: boolean;
   showDropIndicatorBelow: boolean;
   onDragStart: () => void;
   onDragEnd: () => void;
   onDragOver: () => void;
-  onDelete: (taskId: number) => void;
+  onEdit: () => void;
+  onDelete: () => void;
 }) {
   const priorityColors = {
     high: { bg: "bg-red-100", border: "border-red-400", dot: "bg-red-500" },
@@ -59,12 +149,11 @@ function KanbanCard({
     low: { bg: "bg-blue-100", border: "border-blue-400", dot: "bg-blue-500" },
   };
 
-  const priorityStyle = priorityColors[task.priority];
-  const categoryColor = categoryColors[task.category] || categoryColors["기타 Other"];
+  const priorityStyle = priorityColors[card.priority];
+  const categoryColor = categoryColors[card.category] || categoryColors["기타 Other"];
 
   return (
     <div className="relative">
-      {/* Drop indicator above */}
       {showDropIndicatorAbove && (
         <motion.div
           initial={{ opacity: 0, scaleY: 0 }}
@@ -94,46 +183,57 @@ function KanbanCard({
           border-3 p-3 cursor-grab active:cursor-grabbing
           shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)]
           hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.3)]
-          transition-shadow
-          ${task.status === "done" ? "opacity-70" : ""}
+          transition-shadow group
+          ${card.status === "done" ? "opacity-70" : ""}
           ${isBeingDragged ? "ring-2 ring-[#FF1493]" : ""}
         `}
         style={{ fontFamily: "'DungGeunMo', monospace" }}
       >
         <div className="flex items-start justify-between gap-2 mb-2">
-          <h4 className={`text-xs font-bold flex-1 ${task.status === "done" ? "line-through text-gray-500" : ""}`}>
-            {task.title}
+          <h4 className={`text-xs font-bold flex-1 ${card.status === "done" ? "line-through text-gray-500" : ""}`}>
+            {card.title}
           </h4>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete(task.id);
-            }}
-            className="w-5 h-5 bg-white border-2 border-gray-400 text-[10px] hover:bg-red-200 hover:border-red-400 flex items-center justify-center"
-          >
-            ✕
-          </button>
+          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit();
+              }}
+              className="w-5 h-5 bg-white border-2 border-blue-400 text-[10px] hover:bg-blue-200 flex items-center justify-center"
+            >
+              <Edit2 className="w-3 h-3" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+              className="w-5 h-5 bg-white border-2 border-red-400 text-[10px] hover:bg-red-200 flex items-center justify-center"
+            >
+              <Trash2 className="w-3 h-3" />
+            </button>
+          </div>
         </div>
+
+        {card.description && (
+          <p className="text-[10px] text-gray-600 mb-2 line-clamp-2">
+            {card.description}
+          </p>
+        )}
 
         <div className="flex items-center gap-2 text-[10px]">
           <span className="flex items-center gap-1">
             <span className={`w-2 h-2 ${priorityStyle.dot}`} />
-            {task.priority === "high" ? "높음" : task.priority === "medium" ? "보통" : "낮음"}
+            {card.priority === "high" ? "높음" : card.priority === "medium" ? "보통" : "낮음"}
           </span>
           <span className="text-gray-400">|</span>
           <span className="flex items-center gap-1">
             <span className={`w-2 h-2 ${categoryColor}`} />
-            {task.category.split(" ")[0]}
+            {card.category.split(" ")[0]}
           </span>
-        </div>
-
-        <div className="flex items-center justify-between mt-2 text-[9px] text-gray-500">
-          <span>⏰ {task.time}</span>
-          <span>📅 {task.date}</span>
         </div>
       </motion.div>
 
-      {/* Drop indicator below (for last item) */}
       {showDropIndicatorBelow && (
         <motion.div
           initial={{ opacity: 0, scaleY: 0 }}
@@ -145,20 +245,50 @@ function KanbanCard({
   );
 }
 
-function KanbanColumn({ 
-  columnId, 
-  label, 
-  color, 
-  tasks, 
+// 칸반 컬럼 컴포넌트
+function KanbanColumn({
+  columnId,
+  label,
+  color,
+  cards,
   dragInfo,
   dropTargetIndex,
+  isAddingCard,
+  editingCard,
   onDragStart,
   onDragEnd,
-  onDrop, 
+  onDrop,
   onDragOverCard,
   onDragLeaveColumn,
-  onDeleteTask,
-}: KanbanColumnProps) {
+  onAddCard,
+  onStartAddCard,
+  onCancelAddCard,
+  onEditCard,
+  onStartEditCard,
+  onCancelEditCard,
+  onDeleteCard,
+}: {
+  columnId: TaskStatus;
+  label: string;
+  color: string;
+  cards: KanbanCard[];
+  dragInfo: DragInfo | null;
+  dropTargetIndex: number | null;
+  isAddingCard: boolean;
+  editingCard: KanbanCard | null;
+  onDragStart: (cardId: number, status: TaskStatus) => void;
+  onDragEnd: () => void;
+  onDrop: (cardId: number, newStatus: TaskStatus, targetIndex: number) => void;
+  onDragOverCard: (index: number) => void;
+  onDragLeaveColumn: () => void;
+  onAddCard: (data: { title: string; description?: string; status: TaskStatus; priority: "high" | "medium" | "low"; category: string }) => void;
+  onStartAddCard: () => void;
+  onCancelAddCard: () => void;
+  onEditCard: (cardId: number, data: Partial<KanbanCard>) => void;
+  onStartEditCard: (card: KanbanCard) => void;
+  onCancelEditCard: () => void;
+  onDeleteCard: (cardId: number) => void;
+}) {
   const [isDragOver, setIsDragOver] = useState(false);
   const columnRef = useRef<HTMLDivElement>(null);
 
@@ -168,7 +298,6 @@ function KanbanColumn({
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
-    // 자식 요소로 이동할 때는 무시
     if (columnRef.current?.contains(e.relatedTarget as Node)) {
       return;
     }
@@ -181,13 +310,9 @@ function KanbanColumn({
     setIsDragOver(false);
     
     if (dragInfo) {
-      const targetIndex = dropTargetIndex !== null ? dropTargetIndex : tasks.length;
-      onDrop(dragInfo.taskId, columnId, targetIndex);
+      const targetIndex = dropTargetIndex !== null ? dropTargetIndex : cards.length;
+      onDrop(dragInfo.cardId, columnId, targetIndex);
     }
-  };
-
-  const handleEmptyAreaDragOver = () => {
-    onDragOverCard(tasks.length);
   };
 
   return (
@@ -216,12 +341,20 @@ function KanbanColumn({
         >
           {label.split(" • ")[0]}
         </h3>
-        <span 
-          className="bg-white text-black px-2 py-1 text-xs font-bold border-2 border-black"
-          style={{ fontFamily: "'DungGeunMo', monospace" }}
-        >
-          {tasks.length}
-        </span>
+        <div className="flex items-center gap-2">
+          <span 
+            className="bg-white text-black px-2 py-1 text-xs font-bold border-2 border-black"
+            style={{ fontFamily: "'DungGeunMo', monospace" }}
+          >
+            {cards.length}
+          </span>
+          <button
+            onClick={onStartAddCard}
+            className="w-6 h-6 bg-white border-2 border-black flex items-center justify-center hover:bg-gray-100"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {/* Column Content */}
@@ -231,15 +364,20 @@ function KanbanColumn({
           ${isDragOver ? "bg-pink-50" : "bg-gray-50"}
           transition-colors duration-200
         `}
-        onDragOver={(e) => {
-          e.preventDefault();
-          if (tasks.length === 0) {
-            handleEmptyAreaDragOver();
-          }
-        }}
       >
+        {/* Add Card Form */}
+        <AnimatePresence>
+          {isAddingCard && (
+            <CardForm
+              targetStatus={columnId}
+              onSave={onAddCard}
+              onCancel={onCancelAddCard}
+            />
+          )}
+        </AnimatePresence>
+
         <AnimatePresence mode="popLayout">
-          {tasks.length === 0 ? (
+          {cards.length === 0 && !isAddingCard ? (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -247,27 +385,40 @@ function KanbanColumn({
               style={{ fontFamily: "'DungGeunMo', monospace" }}
             >
               <div className="text-3xl mb-2">📋</div>
-              <p className="text-xs">태스크를 드래그해서</p>
-              <p className="text-xs">여기에 놓으세요</p>
+              <p className="text-xs">카드를 추가하거나</p>
+              <p className="text-xs">드래그해서 놓으세요</p>
             </motion.div>
           ) : (
-            tasks.map((task, index) => {
-              const isBeingDragged = dragInfo?.taskId === task.id;
+            cards.map((card, index) => {
+              const isBeingDragged = dragInfo?.cardId === card.id;
               const showDropIndicatorAbove = dropTargetIndex === index && !isBeingDragged;
-              const showDropIndicatorBelow = dropTargetIndex === tasks.length && index === tasks.length - 1 && !isBeingDragged;
+              const showDropIndicatorBelow = dropTargetIndex === cards.length && index === cards.length - 1 && !isBeingDragged;
               
+              // 수정 중인 카드인 경우 폼 표시
+              if (editingCard?.id === card.id) {
+                return (
+                  <CardForm
+                    key={card.id}
+                    initialData={card}
+                    targetStatus={columnId}
+                    onSave={(data) => onEditCard(card.id, data)}
+                    onCancel={onCancelEditCard}
+                  />
+                );
+              }
+
               return (
-                <KanbanCard
-                  key={task.id}
-                  task={task}
-                  index={index}
+                <KanbanCardItem
+                  key={card.id}
+                  card={card}
                   isBeingDragged={isBeingDragged}
                   showDropIndicatorAbove={showDropIndicatorAbove}
                   showDropIndicatorBelow={showDropIndicatorBelow}
-                  onDragStart={() => onDragStart(task.id, columnId)}
+                  onDragStart={() => onDragStart(card.id, columnId)}
                   onDragEnd={onDragEnd}
                   onDragOver={() => onDragOverCard(index)}
-                  onDelete={onDeleteTask}
+                  onEdit={() => onStartEditCard(card)}
+                  onDelete={() => onDeleteCard(card.id)}
                 />
               );
             })
@@ -275,12 +426,12 @@ function KanbanColumn({
         </AnimatePresence>
         
         {/* Drop zone at the bottom */}
-        {tasks.length > 0 && (
+        {cards.length > 0 && (
           <div 
             className="h-8 mt-2"
             onDragOver={(e) => {
               e.preventDefault();
-              onDragOverCard(tasks.length);
+              onDragOverCard(cards.length);
             }}
           />
         )}
@@ -289,27 +440,29 @@ function KanbanColumn({
   );
 }
 
-export function RetroPlannerKanbanView({
-  tasks,
-  onStatusChange,
-  onReorder,
-  onDeleteTask,
-}: RetroPlannerKanbanViewProps) {
+export function RetroPlannerKanbanView() {
+  const {
+    cards,
+    editingCard,
+    isAddingCard,
+    addingToColumn,
+    getCardsByStatus,
+    addCard,
+    updateCard,
+    deleteCard,
+    reorderCard,
+    startAddingCard,
+    cancelAddingCard,
+    startEditingCard,
+    cancelEditingCard,
+  } = useKanbanContext();
+
   const [dragInfo, setDragInfo] = useState<DragInfo | null>(null);
   const [dropTargetColumn, setDropTargetColumn] = useState<TaskStatus | null>(null);
   const [dropTargetIndex, setDropTargetIndex] = useState<number | null>(null);
 
-  const getTasksByStatus = (status: TaskStatus): Task[] => {
-    return tasks
-      .filter((task) => {
-        const taskStatus = task.status || (task.completed ? "done" : "todo");
-        return taskStatus === status;
-      })
-      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-  };
-
-  const handleDragStart = (taskId: number, status: TaskStatus) => {
-    setDragInfo({ taskId, sourceStatus: status });
+  const handleDragStart = (cardId: number, status: TaskStatus) => {
+    setDragInfo({ cardId, sourceStatus: status });
   };
 
   const handleDragEnd = () => {
@@ -318,9 +471,9 @@ export function RetroPlannerKanbanView({
     setDropTargetIndex(null);
   };
 
-  const handleDrop = (taskId: number, newStatus: TaskStatus, targetIndex: number) => {
+  const handleDrop = (cardId: number, newStatus: TaskStatus, targetIndex: number) => {
     if (dragInfo) {
-      onReorder(taskId, newStatus, targetIndex);
+      reorderCard(cardId, newStatus, targetIndex);
     }
     handleDragEnd();
   };
@@ -335,9 +488,7 @@ export function RetroPlannerKanbanView({
   };
 
   return (
-    <div 
-      className="p-4 w-full"
-    >
+    <div className="p-4 w-full">
       {/* Kanban Header */}
       <div 
         className="text-center mb-6"
@@ -350,7 +501,7 @@ export function RetroPlannerKanbanView({
           className="text-xs text-gray-600"
           style={{ fontFamily: "'DungGeunMo', monospace" }}
         >
-          드래그앤드롭으로 태스크 상태와 순서를 변경하세요
+          각 컬럼의 + 버튼으로 카드를 추가하고, 드래그로 이동하세요
         </p>
       </div>
 
@@ -367,15 +518,23 @@ export function RetroPlannerKanbanView({
             columnId={column.id as TaskStatus}
             label={column.label}
             color={column.color}
-            tasks={getTasksByStatus(column.id as TaskStatus)}
+            cards={getCardsByStatus(column.id as TaskStatus)}
             dragInfo={dragInfo}
             dropTargetIndex={dropTargetColumn === column.id ? dropTargetIndex : null}
+            isAddingCard={isAddingCard && addingToColumn === column.id}
+            editingCard={editingCard}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
             onDrop={handleDrop}
             onDragOverCard={(index) => handleDragOverCard(column.id as TaskStatus, index)}
             onDragLeaveColumn={handleDragLeaveColumn}
-            onDeleteTask={onDeleteTask}
+            onAddCard={addCard}
+            onStartAddCard={() => startAddingCard(column.id as TaskStatus)}
+            onCancelAddCard={cancelAddingCard}
+            onEditCard={updateCard}
+            onStartEditCard={startEditingCard}
+            onCancelEditCard={cancelEditingCard}
+            onDeleteCard={deleteCard}
           />
         ))}
       </div>
@@ -386,7 +545,7 @@ export function RetroPlannerKanbanView({
         style={{ fontFamily: "'DungGeunMo', monospace" }}
       >
         {kanbanColumns.map((column) => {
-          const count = getTasksByStatus(column.id as TaskStatus).length;
+          const count = getCardsByStatus(column.id as TaskStatus).length;
           return (
             <div
               key={column.id}
@@ -401,6 +560,10 @@ export function RetroPlannerKanbanView({
             </div>
           );
         })}
+        <div className="bg-white border-3 border-black px-4 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)]">
+          <span className="text-xs">전체: </span>
+          <span className="font-bold text-sm">{cards.length}</span>
+        </div>
       </div>
     </div>
   );

@@ -24,6 +24,7 @@ import { RetroPlannerColorPalette } from "./RetroPlanner.ColorPalette";
 import { RetroPlannerStatusBar } from "./RetroPlanner.StatusBar";
 import { RetroPlannerCategoryStats } from "./RetroPlanner.CategoryStats";
 import { useRetroPlanner } from "./useRetroPlanner";
+import { KanbanProvider } from "./KanbanContext";
 
 export function RetroPlanner() {
   const {
@@ -53,8 +54,6 @@ export function RetroPlanner() {
     handleToday,
     handleSaveTask,
     handleToggleTask,
-    handleStatusChange,
-    handleReorder,
     handleDeleteTask,
     handleTimeUpdate,
     handlePrevPage,
@@ -68,10 +67,11 @@ export function RetroPlanner() {
   const isHorizontalScrollView = viewMode === "timeline" || viewMode === "kanban";
 
   return (
-    <div 
-      className={`${containerStyles.wrapper} ${isHorizontalScrollView ? "!max-w-none !w-[calc(100vw-2rem)] md:!w-[calc(100vw-4rem)] overflow-x-auto" : ""}`}
-    >
-      <RetroPlannerFloatingDecorations />
+    <KanbanProvider>
+      <div 
+        className={`${containerStyles.wrapper} ${isHorizontalScrollView ? "!max-w-none !w-[calc(100vw-2rem)] md:!w-[calc(100vw-4rem)] overflow-x-auto" : ""}`}
+      >
+        <RetroPlannerFloatingDecorations />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -128,20 +128,13 @@ export function RetroPlanner() {
                       <div className={`relative z-10 p-4 min-h-[400px] ${isHorizontalScrollView ? "w-full" : ""}`}>
                         {viewMode === "timeline" && (
                           <RetroPlannerTimelineView
-                            tasks={tasks}
                             startDate={new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1)}
                             endDate={new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0)}
                           />
                         )}
 
                         {viewMode === "kanban" && (
-                          <RetroPlannerKanbanView
-                            tasks={tasks}
-                            onStatusChange={handleStatusChange}
-                            onReorder={handleReorder}
-                            onToggleTask={handleToggleTask}
-                            onDeleteTask={handleDeleteTask}
-                          />
+                          <RetroPlannerKanbanView />
                         )}
 
                         {viewMode === "week" && (
@@ -213,11 +206,12 @@ export function RetroPlanner() {
       </motion.div>
 
       {/* Editor Modal */}
-      <AnimatePresence>
-        {showEditor && (
-          <RetroPlannerEditor onClose={() => setShowEditor(false)} onSave={handleSaveTask} />
-        )}
-      </AnimatePresence>
-    </div>
+        <AnimatePresence>
+          {showEditor && (
+            <RetroPlannerEditor onClose={() => setShowEditor(false)} onSave={handleSaveTask} />
+          )}
+        </AnimatePresence>
+      </div>
+    </KanbanProvider>
   );
 }

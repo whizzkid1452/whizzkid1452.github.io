@@ -1,5 +1,18 @@
 export type TaskStatus = "todo" | "in_progress" | "done";
 
+// 칸반보드 전용 카드 타입
+export interface KanbanCard {
+  id: number;
+  title: string;
+  description?: string;
+  status: TaskStatus;
+  priority: "high" | "medium" | "low";
+  category: string;
+  order: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Task {
   id: number;
   title: string;
