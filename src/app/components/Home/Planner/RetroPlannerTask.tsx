@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
-import { Check, Trash2, Star, Circle } from "lucide-react";
+import { Check, Trash2, Star, Circle, Play, Pause, Clock } from "lucide-react";
 import { categoryColors } from "./RetroPlanner.constants";
+import { useTimeTracker } from "./useTimeTracker";
 
 interface PlannerTaskProps {
   id: number;
@@ -9,9 +10,24 @@ interface PlannerTaskProps {
   category: string;
   priority: "high" | "medium" | "low";
   completed: boolean;
+  trackedTime?: number;
+  isTracking?: boolean;
   onToggle: (id: number) => void;
   onDelete: (id: number) => void;
+  onTimeUpdate?: (taskId: number, minutes: number) => void;
   delay?: number;
+}
+
+/**
+ * 분을 시간:분 형식으로 변환
+ */
+function formatTrackedTime(minutes: number): string {
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (hours > 0) {
+    return `${hours}h ${mins}m`;
+  }
+  return `${mins}m`;
 }
 
 export function RetroPlannerTask({
@@ -21,10 +37,21 @@ export function RetroPlannerTask({
   category,
   priority,
   completed,
+  trackedTime: initialTrackedTime = 0,
+  isTracking: initialIsTracking = false,
   onToggle,
   onDelete,
+  onTimeUpdate,
   delay = 0,
 }: PlannerTaskProps) {
+  const { trackedTime, isTracking, toggleTracking } = useTimeTracker({
+    initialTrackedTime,
+    isTracking: initialIsTracking,
+    onTimeUpdate: (minutes) => {
+      onTimeUpdate?.(id, minutes);
+    },
+  });
+
   const priorityColors = {
     high: { bg: "from-red-400 to-red-500", border: "border-red-600", text: "text-red-600" },
     medium: { bg: "from-orange-400 to-orange-500", border: "border-orange-600", text: "text-orange-600" },
@@ -34,6 +61,11 @@ export function RetroPlannerTask({
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     onDelete(id);
+  };
+
+  const handleToggleTracking = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleTracking();
   };
 
   return (
@@ -114,17 +146,52 @@ export function RetroPlannerTask({
           >
             {title}
           </p>
+          
+          {/* Time Tracker */}
+          {(trackedTime > 0 || isTracking) && (
+            <div className="flex items-center gap-2 mt-2">
+              <Clock className="w-3 h-3 text-[#00bcd4]" />
+              <span
+                className="text-[10px] text-[#00bcd4]"
+                style={{ fontFamily: "'DungGeunMo', monospace" }}
+              >
+                {formatTrackedTime(trackedTime)}
+              </span>
+            </div>
+          )}
         </div>
 
-        {/* Delete Button */}
-        <motion.button
-          whileHover={{ scale: 1.2, rotate: 10 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={handleDelete}
-          className="flex-shrink-0 w-7 h-7 bg-red-500 border-2 border-black hover:bg-red-600 transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100 flex items-center justify-center"
-        >
-          <Trash2 className="w-4 h-4 text-white" />
-        </motion.button>
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {/* Time Tracker Button */}
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={handleToggleTracking}
+            className={`w-7 h-7 border-2 border-black transition-colors flex items-center justify-center ${
+              isTracking
+                ? "bg-[#00bcd4] hover:bg-[#0097a7]"
+                : "bg-white hover:bg-gray-100"
+            }`}
+            title={isTracking ? "추적 정지" : "시간 추적 시작"}
+          >
+            {isTracking ? (
+              <Pause className="w-3 h-3 text-white" />
+            ) : (
+              <Play className="w-3 h-3 text-[#00bcd4]" />
+            )}
+          </motion.button>
+
+          {/* Delete Button */}
+          <motion.button
+            whileHover={{ scale: 1.2, rotate: 10 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={handleDelete}
+            className="w-7 h-7 bg-red-500 border-2 border-black hover:bg-red-600 transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100 flex items-center justify-center"
+          >
+            <Trash2 className="w-4 h-4 text-white" />
+          </motion.button>
+        </div>
       </div>
     </motion.div>
   );

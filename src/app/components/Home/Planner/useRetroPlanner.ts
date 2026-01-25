@@ -58,11 +58,12 @@ const initialTasks: Task[] = [
 export function useRetroPlanner() {
   const [showEditor, setShowEditor] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [viewMode, setViewMode] = useState<"today" | "week" | "month">("week");
+  const [viewMode, setViewMode] = useState<"today" | "week" | "month" | "timeline">("week");
   const [plannerMode, setPlannerMode] = useState<PlannerMode>("All");
   const [currentPage, setCurrentPage] = useState(1);
   const [isMinimized, setIsMinimized] = useState(false);
   const [hoveredDate, setHoveredDate] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [googleCalendarTasks, setGoogleCalendarTasks] = useState<Task[]>([]);
 
@@ -147,10 +148,15 @@ export function useRetroPlanner() {
   const selectedDateStr = formatDate(selectedDate);
   const todayTasks = allTasks.filter((task) => task.date === selectedDateStr);
   
-  const sortedTasks = sortTasksByPriorityAndTime(todayTasks);
+  // 카테고리 필터링
+  const filteredTasks = selectedCategory
+    ? todayTasks.filter((task) => task.category === selectedCategory)
+    : todayTasks;
   
-  const completedCount = todayTasks.filter((task) => task.completed).length;
-  const totalCount = todayTasks.length;
+  const sortedTasks = sortTasksByPriorityAndTime(filteredTasks);
+  
+  const completedCount = filteredTasks.filter((task) => task.completed).length;
+  const totalCount = filteredTasks.length;
   const displayDate = formatDisplayDate(selectedDate);
 
   const totalPages = Math.ceil(sortedTasks.length / tasksPerPage);
@@ -171,6 +177,8 @@ export function useRetroPlanner() {
     time: string;
     category: string;
     priority: "high" | "medium" | "low";
+    startDate?: string;
+    endDate?: string;
   }) => {
     const taskDate = formatDate(selectedDate);
     const [hours, minutes] = taskData.time.split(':').map(Number);
@@ -210,6 +218,8 @@ export function useRetroPlanner() {
       ...taskData,
       completed: false,
       date: taskDate,
+      startDate: taskData.startDate,
+      endDate: taskData.endDate,
     };
     setTasks([...tasks, newTask]);
     setCurrentPage(1);
@@ -268,6 +278,18 @@ export function useRetroPlanner() {
     }
   };
 
+  const handleTimeUpdate = (taskId: number, minutes: number) => {
+    const task = tasks.find((t) => t.id === taskId);
+    if (task) {
+      setTasks(tasks.map((t) => (t.id === taskId ? { ...t, trackedTime: minutes } : t)));
+    } else {
+      // Google Calendar 태스크인 경우
+      setGoogleCalendarTasks(
+        googleCalendarTasks.map((t) => (t.id === taskId ? { ...t, trackedTime: minutes } : t))
+      );
+    }
+  };
+
   const handlePrevPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
@@ -282,6 +304,11 @@ export function useRetroPlanner() {
 
   const handleDateChange = (date: Date) => {
     setSelectedDate(date);
+    setCurrentPage(1);
+  };
+
+  const handleCategoryChange = (category: string | null) => {
+    setSelectedCategory(category);
     setCurrentPage(1);
   };
 
@@ -321,6 +348,8 @@ export function useRetroPlanner() {
     setIsMinimized,
     hoveredDate,
     setHoveredDate,
+    selectedCategory,
+    setSelectedCategory: handleCategoryChange,
     tasks: allTasks,
     todayTasks,
     currentTasks,
@@ -337,6 +366,7 @@ export function useRetroPlanner() {
     handleSaveTask,
     handleToggleTask,
     handleDeleteTask,
+    handleTimeUpdate,
     handlePrevPage,
     handleNextPage,
     handleDateChange,

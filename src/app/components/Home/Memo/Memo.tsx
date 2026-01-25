@@ -1,16 +1,28 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useMemoData } from "./useMemo";
+import { useNotepad } from "./useNotepad";
 import { windowBorderStyle } from "./Memo.styles";
 import { MemoFloatingDecorations } from "./Memo.FloatingDecorations";
 import { MemoTitleBar } from "./Memo.TitleBar";
 import { MemoMenuBar } from "./Memo.MenuBar";
 import { MemoEditorArea } from "./Memo.EditorArea";
 import { MemoInfoBar } from "./Memo.InfoBar";
+import { MemoNoteList } from "./Memo.NoteList";
 
 export function Memo() {
   const [isMinimized, setIsMinimized] = useState(false);
   const { content, isLoading, error, handleChange, handleBlur } = useMemoData();
+  const {
+    notes,
+    createNote,
+    updateNote,
+    deleteNote,
+    toggleNoteExpanded,
+    expandAllNotes,
+    collapseAllNotes,
+    changeNoteColor,
+  } = useNotepad();
 
   return (
     <div className="w-full max-w-6xl mx-auto mb-6 md:mb-8 relative">
@@ -44,6 +56,18 @@ export function Memo() {
                   onBlur={handleBlur}
                 />
                 <MemoInfoBar />
+
+                {/* 노트 리스트 */}
+                <MemoNoteList
+                  notes={notes}
+                  onCreateNote={createNote}
+                  onUpdateNote={updateNote}
+                  onDeleteNote={deleteNote}
+                  onToggleExpand={toggleNoteExpanded}
+                  onExpandAll={expandAllNotes}
+                  onCollapseAll={collapseAllNotes}
+                  onChangeColor={changeNoteColor}
+                />
               </div>
             </motion.div>
           )}

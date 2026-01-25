@@ -14,12 +14,14 @@ import { RetroPlannerToolbox } from "./RetroPlanner.Toolbox";
 import { RetroPlannerCanvasDecorations } from "./RetroPlanner.CanvasDecorations";
 import { RetroPlannerWeekView } from "./RetroPlanner.WeekView";
 import { RetroPlannerMonthView } from "./RetroPlanner.MonthView";
+import { RetroPlannerTimelineView } from "./RetroPlanner.TimelineView";
 import { RetroPlannerStats } from "./RetroPlanner.Stats";
 import { RetroPlannerTaskList } from "./RetroPlanner.TaskList";
 import { RetroPlannerPagination } from "./RetroPlanner.Pagination";
 import { RetroPlannerProgressBar } from "./RetroPlanner.ProgressBar";
 import { RetroPlannerColorPalette } from "./RetroPlanner.ColorPalette";
 import { RetroPlannerStatusBar } from "./RetroPlanner.StatusBar";
+import { RetroPlannerCategoryStats } from "./RetroPlanner.CategoryStats";
 import { useRetroPlanner } from "./useRetroPlanner";
 
 export function RetroPlanner() {
@@ -35,6 +37,8 @@ export function RetroPlanner() {
     setIsMinimized,
     hoveredDate,
     setHoveredDate,
+    selectedCategory,
+    setSelectedCategory,
     tasks,
     currentTasks,
     completedCount,
@@ -49,6 +53,7 @@ export function RetroPlanner() {
     handleSaveTask,
     handleToggleTask,
     handleDeleteTask,
+    handleTimeUpdate,
     handlePrevPage,
     handleNextPage,
     handleDateChange,
@@ -58,13 +63,13 @@ export function RetroPlanner() {
   } = useRetroPlanner();
 
   return (
-    <div className={containerStyles.wrapper}>
+    <div className={`${containerStyles.wrapper} ${viewMode === "timeline" ? "overflow-x-auto" : ""}`}>
       <RetroPlannerFloatingDecorations />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className={containerStyles.mainContainer}
+        className={`${containerStyles.mainContainer} ${viewMode === "timeline" ? "overflow-x-visible" : ""}`}
         style={getWindowBorderStyle()}
       >
         <RetroPlannerTitleBar
@@ -89,19 +94,21 @@ export function RetroPlanner() {
                 selectedDate={selectedDate}
                 onDateChange={handleDateChange}
                 onToday={handleToday}
+                selectedCategory={selectedCategory}
+                onCategoryChange={setSelectedCategory}
               />
 
-              <div className="flex">
+              <div className={`flex ${viewMode === "timeline" ? "overflow-x-visible" : ""}`}>
                 <RetroPlannerToolbox 
                   onAddTask={() => setShowEditor(true)}
                   plannerMode={plannerMode}
                   onPlannerModeChange={setPlannerMode}
                 />
 
-                <div className={containerStyles.canvas}>
-                  <div className={containerStyles.canvasArea} style={{ borderColor: "#808080" }}>
+                <div className={`${containerStyles.canvas} ${viewMode === "timeline" ? "overflow-x-visible min-w-0" : ""}`}>
+                  <div className={`${containerStyles.canvasArea} ${viewMode === "timeline" ? "overflow-x-visible" : ""}`} style={{ borderColor: "#808080" }}>
                     <div 
-                      className="w-full h-full relative"
+                      className={`w-full h-full relative ${viewMode === "timeline" ? "overflow-x-visible" : ""}`}
                       style={getCanvasGradient()}
                     >
                       <div 
@@ -111,7 +118,15 @@ export function RetroPlanner() {
 
                       <RetroPlannerCanvasDecorations />
 
-                      <div className="relative z-10 p-4 min-h-[400px]">
+                      <div className={`relative z-10 p-4 min-h-[400px] ${viewMode === "timeline" ? "overflow-x-visible w-auto" : ""}`}>
+                        {viewMode === "timeline" && (
+                          <RetroPlannerTimelineView
+                            tasks={tasks}
+                            startDate={new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1)}
+                            endDate={new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0)}
+                          />
+                        )}
+
                         {viewMode === "week" && (
                           <RetroPlannerWeekView
                             weekDates={weekDates}
@@ -129,16 +144,24 @@ export function RetroPlanner() {
                           />
                         )}
 
-                        <RetroPlannerStats
-                          totalCount={totalCount}
-                          completedCount={completedCount}
-                        />
+                        {viewMode !== "timeline" && (
+                          <>
+                            <RetroPlannerStats
+                              totalCount={totalCount}
+                              completedCount={completedCount}
+                            />
 
-                        <RetroPlannerTaskList
-                          tasks={currentTasks}
-                          onToggleTask={handleToggleTask}
-                          onDeleteTask={handleDeleteTask}
-                        />
+                            <RetroPlannerCategoryStats tasks={todayTasks} />
+
+                            <RetroPlannerTaskList
+                              tasks={currentTasks}
+                              onToggleTask={handleToggleTask}
+                              onDeleteTask={handleDeleteTask}
+                              selectedCategory={selectedCategory}
+                              onTimeUpdate={handleTimeUpdate}
+                            />
+                          </>
+                        )}
 
                         <RetroPlannerPagination
                           currentPage={currentPage}

@@ -7,6 +7,8 @@ interface TaskData {
   time: string;
   category: string;
   priority: "high" | "medium" | "low";
+  startDate?: string;
+  endDate?: string;
 }
 
 interface PlannerEditorProps {
@@ -19,6 +21,8 @@ export function RetroPlannerEditor({ onClose, onSave }: PlannerEditorProps) {
   const [time, setTime] = useState("09:00");
   const [category, setCategory] = useState("업무 Work");
   const [priority, setPriority] = useState<"high" | "medium" | "low">("medium");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   const categories = [
     { icon: Briefcase, label: "업무 Work", color: "#e91e63" },
@@ -41,6 +45,8 @@ export function RetroPlannerEditor({ onClose, onSave }: PlannerEditorProps) {
         time,
         category,
         priority,
+        startDate: startDate || undefined,
+        endDate: endDate || undefined,
       });
       onClose();
     }
@@ -165,6 +171,54 @@ export function RetroPlannerEditor({ onClose, onSave }: PlannerEditorProps) {
                 );
               })}
             </div>
+          </div>
+
+          {/* Date Range Selection */}
+          <div>
+            <label
+              className="block text-[#00bcd4] text-xs md:text-sm mb-2"
+              style={{ fontFamily: "'DungGeunMo', monospace" }}
+            >
+              기간 • Date Range
+            </label>
+            <div className="grid grid-cols-2 gap-2 md:gap-3">
+              <div>
+                <label
+                  className="block text-[10px] text-gray-600 mb-1"
+                  style={{ fontFamily: "'DungGeunMo', monospace" }}
+                >
+                  시작일 • Start
+                </label>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full p-2 border-3 border-[#00bcd4] bg-[#e0f7fa] text-[#1a0033] text-xs focus:outline-none focus:border-[#0097a7]"
+                  style={{ fontFamily: "'DungGeunMo', monospace" }}
+                />
+              </div>
+              <div>
+                <label
+                  className="block text-[10px] text-gray-600 mb-1"
+                  style={{ fontFamily: "'DungGeunMo', monospace" }}
+                >
+                  종료일 • End
+                </label>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  min={startDate || undefined}
+                  className="w-full p-2 border-3 border-[#00bcd4] bg-[#e0f7fa] text-[#1a0033] text-xs focus:outline-none focus:border-[#0097a7]"
+                  style={{ fontFamily: "'DungGeunMo', monospace" }}
+                />
+              </div>
+            </div>
+            {startDate && endDate && new Date(startDate) > new Date(endDate) && (
+              <p className="text-[10px] text-red-500 mt-1" style={{ fontFamily: "'DungGeunMo', monospace" }}>
+                종료일은 시작일보다 이후여야 합니다
+              </p>
+            )}
           </div>
 
           {/* Priority Selection */}
