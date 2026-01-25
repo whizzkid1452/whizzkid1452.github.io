@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import type { Task, TaskStatus } from "./RetroPlanner.types";
 import { kanbanColumns, categoryColors } from "./RetroPlanner.constants";
@@ -7,8 +7,14 @@ import { getFontStyle } from "./RetroPlanner.styles";
 interface RetroPlannerKanbanViewProps {
   tasks: Task[];
   onStatusChange: (taskId: number, newStatus: TaskStatus) => void;
+  onReorder: (taskId: number, newStatus: TaskStatus, targetIndex: number) => void;
   onToggleTask: (taskId: number) => void;
   onDeleteTask: (taskId: number) => void;
+}
+
+interface DragInfo {
+  taskId: number;
+  sourceStatus: TaskStatus;
 }
 
 interface KanbanColumnProps {
@@ -16,17 +22,35 @@ interface KanbanColumnProps {
   label: string;
   color: string;
   tasks: Task[];
-  onDrop: (taskId: number, newStatus: TaskStatus) => void;
+  dragInfo: DragInfo | null;
+  dropTargetIndex: number | null;
+  onDragStart: (taskId: number, status: TaskStatus) => void;
+  onDragEnd: () => void;
+  onDrop: (taskId: number, newStatus: TaskStatus, targetIndex: number) => void;
+  onDragOverCard: (index: number) => void;
+  onDragLeaveColumn: () => void;
   onDeleteTask: (taskId: number) => void;
 }
 
 function KanbanCard({ 
-  task, 
+  task,
+  index,
+  isBeingDragged,
+  showDropIndicatorAbove,
+  showDropIndicatorBelow,
   onDragStart,
+  onDragEnd,
+  onDragOver,
   onDelete,
 }: { 
-  task: Task; 
-  onDragStart: (e: React.DragEvent, taskId: number) => void;
+  task: Task;
+  index: number;
+  isBeingDragged: boolean;
+  showDropIndicatorAbove: boolean;
+  showDropIndicatorBelow: boolean;
+  onDragStart: () => void;
+  onDragEnd: () => void;
+  onDragOver: () => void;
   onDelete: (taskId: number) => void;
 }) {
   const priorityColors = {
@@ -39,86 +63,136 @@ function KanbanCard({
   const categoryColor = categoryColors[task.category] || categoryColors["기타 Other"];
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.8 }}
-      whileHover={{ scale: 1.02 }}
-      draggable
-      onDragStart={(e) => onDragStart(e as unknown as React.DragEvent, task.id)}
-      className={`
-        ${priorityStyle.bg} ${priorityStyle.border}
-        border-3 p-3 cursor-grab active:cursor-grabbing
-        shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)]
-        hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.3)]
-        transition-shadow
-        ${task.status === "done" ? "opacity-70" : ""}
-      `}
-      style={{ fontFamily: "'DungGeunMo', monospace" }}
-    >
-      <div className="flex items-start justify-between gap-2 mb-2">
-        <h4 className={`text-xs font-bold flex-1 ${task.status === "done" ? "line-through text-gray-500" : ""}`}>
-          {task.title}
-        </h4>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete(task.id);
-          }}
-          className="w-5 h-5 bg-white border-2 border-gray-400 text-[10px] hover:bg-red-200 hover:border-red-400 flex items-center justify-center"
-        >
-          ✕
-        </button>
-      </div>
+    <div className="relative">
+      {/* Drop indicator above */}
+      {showDropIndicatorAbove && (
+        <motion.div
+          initial={{ opacity: 0, scaleY: 0 }}
+          animate={{ opacity: 1, scaleY: 1 }}
+          className="h-1 bg-[#FF1493] rounded-full mb-2 shadow-[0_0_8px_rgba(255,20,147,0.6)]"
+        />
+      )}
+      
+      <motion.div
+        layout
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ 
+          opacity: isBeingDragged ? 0.5 : 1, 
+          scale: isBeingDragged ? 0.95 : 1,
+        }}
+        exit={{ opacity: 0, scale: 0.8 }}
+        whileHover={{ scale: isBeingDragged ? 0.95 : 1.02 }}
+        draggable
+        onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
+        onDragOver={(e) => {
+          e.preventDefault();
+          onDragOver();
+        }}
+        className={`
+          ${priorityStyle.bg} ${priorityStyle.border}
+          border-3 p-3 cursor-grab active:cursor-grabbing
+          shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)]
+          hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.3)]
+          transition-shadow
+          ${task.status === "done" ? "opacity-70" : ""}
+          ${isBeingDragged ? "ring-2 ring-[#FF1493]" : ""}
+        `}
+        style={{ fontFamily: "'DungGeunMo', monospace" }}
+      >
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <h4 className={`text-xs font-bold flex-1 ${task.status === "done" ? "line-through text-gray-500" : ""}`}>
+            {task.title}
+          </h4>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(task.id);
+            }}
+            className="w-5 h-5 bg-white border-2 border-gray-400 text-[10px] hover:bg-red-200 hover:border-red-400 flex items-center justify-center"
+          >
+            ✕
+          </button>
+        </div>
 
-      <div className="flex items-center gap-2 text-[10px]">
-        <span className="flex items-center gap-1">
-          <span className={`w-2 h-2 ${priorityStyle.dot}`} />
-          {task.priority === "high" ? "높음" : task.priority === "medium" ? "보통" : "낮음"}
-        </span>
-        <span className="text-gray-400">|</span>
-        <span className="flex items-center gap-1">
-          <span className={`w-2 h-2 ${categoryColor}`} />
-          {task.category.split(" ")[0]}
-        </span>
-      </div>
+        <div className="flex items-center gap-2 text-[10px]">
+          <span className="flex items-center gap-1">
+            <span className={`w-2 h-2 ${priorityStyle.dot}`} />
+            {task.priority === "high" ? "높음" : task.priority === "medium" ? "보통" : "낮음"}
+          </span>
+          <span className="text-gray-400">|</span>
+          <span className="flex items-center gap-1">
+            <span className={`w-2 h-2 ${categoryColor}`} />
+            {task.category.split(" ")[0]}
+          </span>
+        </div>
 
-      <div className="flex items-center justify-between mt-2 text-[9px] text-gray-500">
-        <span>⏰ {task.time}</span>
-        <span>📅 {task.date}</span>
-      </div>
-    </motion.div>
+        <div className="flex items-center justify-between mt-2 text-[9px] text-gray-500">
+          <span>⏰ {task.time}</span>
+          <span>📅 {task.date}</span>
+        </div>
+      </motion.div>
+
+      {/* Drop indicator below (for last item) */}
+      {showDropIndicatorBelow && (
+        <motion.div
+          initial={{ opacity: 0, scaleY: 0 }}
+          animate={{ opacity: 1, scaleY: 1 }}
+          className="h-1 bg-[#FF1493] rounded-full mt-2 shadow-[0_0_8px_rgba(255,20,147,0.6)]"
+        />
+      )}
+    </div>
   );
 }
 
-function KanbanColumn({ columnId, label, color, tasks, onDrop, onDeleteTask }: KanbanColumnProps) {
+function KanbanColumn({ 
+  columnId, 
+  label, 
+  color, 
+  tasks, 
+  dragInfo,
+  dropTargetIndex,
+  onDragStart,
+  onDragEnd,
+  onDrop, 
+  onDragOverCard,
+  onDragLeaveColumn,
+  onDeleteTask,
+}: KanbanColumnProps) {
   const [isDragOver, setIsDragOver] = useState(false);
+  const columnRef = useRef<HTMLDivElement>(null);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(true);
   };
 
-  const handleDragLeave = () => {
+  const handleDragLeave = (e: React.DragEvent) => {
+    // 자식 요소로 이동할 때는 무시
+    if (columnRef.current?.contains(e.relatedTarget as Node)) {
+      return;
+    }
     setIsDragOver(false);
+    onDragLeaveColumn();
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
-    const taskId = parseInt(e.dataTransfer.getData("taskId"));
-    if (!isNaN(taskId)) {
-      onDrop(taskId, columnId);
+    
+    if (dragInfo) {
+      const targetIndex = dropTargetIndex !== null ? dropTargetIndex : tasks.length;
+      onDrop(dragInfo.taskId, columnId, targetIndex);
     }
   };
 
-  const handleDragStart = (e: React.DragEvent, taskId: number) => {
-    e.dataTransfer.setData("taskId", taskId.toString());
+  const handleEmptyAreaDragOver = () => {
+    onDragOverCard(tasks.length);
   };
 
   return (
     <div 
+      ref={columnRef}
       className={`
         flex-1 min-w-[280px] max-w-[400px]
         bg-white border-4 border-black
@@ -157,13 +231,19 @@ function KanbanColumn({ columnId, label, color, tasks, onDrop, onDeleteTask }: K
           ${isDragOver ? "bg-pink-50" : "bg-gray-50"}
           transition-colors duration-200
         `}
+        onDragOver={(e) => {
+          e.preventDefault();
+          if (tasks.length === 0) {
+            handleEmptyAreaDragOver();
+          }
+        }}
       >
         <AnimatePresence mode="popLayout">
           {tasks.length === 0 ? (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-center py-8 text-gray-400"
+              className={`text-center py-8 text-gray-400 ${isDragOver ? "ring-2 ring-dashed ring-[#FF1493] rounded-lg" : ""}`}
               style={{ fontFamily: "'DungGeunMo', monospace" }}
             >
               <div className="text-3xl mb-2">📋</div>
@@ -171,16 +251,39 @@ function KanbanColumn({ columnId, label, color, tasks, onDrop, onDeleteTask }: K
               <p className="text-xs">여기에 놓으세요</p>
             </motion.div>
           ) : (
-            tasks.map((task) => (
-              <KanbanCard
-                key={task.id}
-                task={task}
-                onDragStart={handleDragStart}
-                onDelete={onDeleteTask}
-              />
-            ))
+            tasks.map((task, index) => {
+              const isBeingDragged = dragInfo?.taskId === task.id;
+              const showDropIndicatorAbove = dropTargetIndex === index && !isBeingDragged;
+              const showDropIndicatorBelow = dropTargetIndex === tasks.length && index === tasks.length - 1 && !isBeingDragged;
+              
+              return (
+                <KanbanCard
+                  key={task.id}
+                  task={task}
+                  index={index}
+                  isBeingDragged={isBeingDragged}
+                  showDropIndicatorAbove={showDropIndicatorAbove}
+                  showDropIndicatorBelow={showDropIndicatorBelow}
+                  onDragStart={() => onDragStart(task.id, columnId)}
+                  onDragEnd={onDragEnd}
+                  onDragOver={() => onDragOverCard(index)}
+                  onDelete={onDeleteTask}
+                />
+              );
+            })
           )}
         </AnimatePresence>
+        
+        {/* Drop zone at the bottom */}
+        {tasks.length > 0 && (
+          <div 
+            className="h-8 mt-2"
+            onDragOver={(e) => {
+              e.preventDefault();
+              onDragOverCard(tasks.length);
+            }}
+          />
+        )}
       </div>
     </div>
   );
@@ -189,18 +292,46 @@ function KanbanColumn({ columnId, label, color, tasks, onDrop, onDeleteTask }: K
 export function RetroPlannerKanbanView({
   tasks,
   onStatusChange,
+  onReorder,
   onDeleteTask,
 }: RetroPlannerKanbanViewProps) {
+  const [dragInfo, setDragInfo] = useState<DragInfo | null>(null);
+  const [dropTargetColumn, setDropTargetColumn] = useState<TaskStatus | null>(null);
+  const [dropTargetIndex, setDropTargetIndex] = useState<number | null>(null);
+
   const getTasksByStatus = (status: TaskStatus): Task[] => {
-    return tasks.filter((task) => {
-      // 기존 태스크 중 status가 없는 경우 completed 기반으로 처리
-      const taskStatus = task.status || (task.completed ? "done" : "todo");
-      return taskStatus === status;
-    });
+    return tasks
+      .filter((task) => {
+        const taskStatus = task.status || (task.completed ? "done" : "todo");
+        return taskStatus === status;
+      })
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   };
 
-  const handleDrop = (taskId: number, newStatus: TaskStatus) => {
-    onStatusChange(taskId, newStatus);
+  const handleDragStart = (taskId: number, status: TaskStatus) => {
+    setDragInfo({ taskId, sourceStatus: status });
+  };
+
+  const handleDragEnd = () => {
+    setDragInfo(null);
+    setDropTargetColumn(null);
+    setDropTargetIndex(null);
+  };
+
+  const handleDrop = (taskId: number, newStatus: TaskStatus, targetIndex: number) => {
+    if (dragInfo) {
+      onReorder(taskId, newStatus, targetIndex);
+    }
+    handleDragEnd();
+  };
+
+  const handleDragOverCard = (columnId: TaskStatus, index: number) => {
+    setDropTargetColumn(columnId);
+    setDropTargetIndex(index);
+  };
+
+  const handleDragLeaveColumn = () => {
+    setDropTargetIndex(null);
   };
 
   return (
@@ -217,7 +348,7 @@ export function RetroPlannerKanbanView({
           className="text-xs text-gray-600"
           style={{ fontFamily: "'DungGeunMo', monospace" }}
         >
-          드래그앤드롭으로 태스크 상태를 변경하세요
+          드래그앤드롭으로 태스크 상태와 순서를 변경하세요
         </p>
       </div>
 
@@ -230,7 +361,13 @@ export function RetroPlannerKanbanView({
             label={column.label}
             color={column.color}
             tasks={getTasksByStatus(column.id as TaskStatus)}
+            dragInfo={dragInfo}
+            dropTargetIndex={dropTargetColumn === column.id ? dropTargetIndex : null}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
             onDrop={handleDrop}
+            onDragOverCard={(index) => handleDragOverCard(column.id as TaskStatus, index)}
+            onDragLeaveColumn={handleDragLeaveColumn}
             onDeleteTask={onDeleteTask}
           />
         ))}
@@ -238,7 +375,7 @@ export function RetroPlannerKanbanView({
 
       {/* Stats */}
       <div 
-        className="mt-6 flex justify-center gap-4"
+        className="mt-6 flex justify-center gap-4 flex-wrap"
         style={{ fontFamily: "'DungGeunMo', monospace" }}
       >
         {kanbanColumns.map((column) => {

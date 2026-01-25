@@ -9,6 +9,7 @@ export interface Task {
   completed: boolean;
   status: TaskStatus;
   date: string;
+  order?: number; // 칸반보드 내 순서
   googleEventId?: string;
   startDate?: string; // 시작 날짜 (YYYY-MM-DD)
   endDate?: string; // 종료 날짜 (YYYY-MM-DD)

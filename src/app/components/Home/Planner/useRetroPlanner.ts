@@ -301,6 +301,69 @@ export function useRetroPlanner() {
     }
   };
 
+  const handleReorder = (taskId: number, newStatus: TaskStatus, targetIndex: number) => {
+    const task = allTasks.find((t) => t.id === taskId);
+    if (!task) return;
+
+    const isCompleted = newStatus === "done";
+    const currentStatus = task.status || (task.completed ? "done" : "todo");
+    
+    // 해당 status의 태스크들 가져오기
+    const tasksInTargetColumn = allTasks
+      .filter((t) => {
+        const tStatus = t.status || (t.completed ? "done" : "todo");
+        return tStatus === newStatus && t.id !== taskId;
+      })
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    
+    // 새 순서 계산
+    const updatedTasksInColumn = [
+      ...tasksInTargetColumn.slice(0, targetIndex),
+      { ...task, status: newStatus, completed: isCompleted },
+      ...tasksInTargetColumn.slice(targetIndex),
+    ];
+    
+    // order 값 재할당
+    const orderUpdates: Map<number, number> = new Map();
+    updatedTasksInColumn.forEach((t, index) => {
+      orderUpdates.set(t.id, index);
+    });
+
+    // 로컬 태스크 업데이트
+    setTasks(tasks.map((t) => {
+      if (t.id === taskId) {
+        return { 
+          ...t, 
+          status: newStatus, 
+          completed: isCompleted,
+          order: orderUpdates.get(t.id) ?? t.order,
+        };
+      }
+      const tStatus = t.status || (t.completed ? "done" : "todo");
+      if (tStatus === newStatus && orderUpdates.has(t.id)) {
+        return { ...t, order: orderUpdates.get(t.id) };
+      }
+      return t;
+    }));
+
+    // Google Calendar 태스크도 업데이트
+    setGoogleCalendarTasks(googleCalendarTasks.map((t) => {
+      if (t.id === taskId) {
+        return { 
+          ...t, 
+          status: newStatus, 
+          completed: isCompleted,
+          order: orderUpdates.get(t.id) ?? t.order,
+        };
+      }
+      const tStatus = t.status || (t.completed ? "done" : "todo");
+      if (tStatus === newStatus && orderUpdates.has(t.id)) {
+        return { ...t, order: orderUpdates.get(t.id) };
+      }
+      return t;
+    }));
+  };
+
   const handleDeleteTask = async (id: number) => {
     const task = allTasks.find((t) => t.id === id);
     if (!task) return;
@@ -409,6 +472,7 @@ export function useRetroPlanner() {
     handleSaveTask,
     handleToggleTask,
     handleStatusChange,
+    handleReorder,
     handleDeleteTask,
     handleTimeUpdate,
     handlePrevPage,

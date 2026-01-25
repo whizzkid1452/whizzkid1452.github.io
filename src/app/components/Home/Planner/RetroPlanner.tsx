@@ -54,6 +54,7 @@ export function RetroPlanner() {
     handleSaveTask,
     handleToggleTask,
     handleStatusChange,
+    handleReorder,
     handleDeleteTask,
     handleTimeUpdate,
     handlePrevPage,
@@ -133,6 +134,7 @@ export function RetroPlanner() {
                           <RetroPlannerKanbanView
                             tasks={tasks}
                             onStatusChange={handleStatusChange}
+                            onReorder={handleReorder}
                             onToggleTask={handleToggleTask}
                             onDeleteTask={handleDeleteTask}
                           />
